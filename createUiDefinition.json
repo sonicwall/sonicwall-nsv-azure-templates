@@ -96,7 +96,7 @@
                             "subnets": "Subnet definitons for WAN and LAN zone."
                         },
                         "defaultValue": {
-                            "name": "VNET",
+                            "name": "fwVirtualNet",
                             "addressPrefixSize": "/16"
                         },
                         "constraints": {
@@ -104,9 +104,9 @@
                         },
                         "subnets": {
                             "subnet1": {
-                                "label": "WAN subnet",
+                                "label": "WAN X1 subnet",
                                 "defaultValue": {
-                                    "name": "WAN",
+                                    "name": "WAN-X1",
                                     "addressPrefixSize": "/24"
                                 },
                                 "constraints": {
@@ -116,9 +116,9 @@
                                 }
                             },
                             "subnet2": {
-                                "label": "LAN subnet",
+                                "label": "LAN X0 subnet",
                                 "defaultValue": {
-                                    "name": "LAN",
+                                    "name": "LAN-X0",
                                     "addressPrefixSize": "/24"
                                 },
                                 "constraints": {
@@ -191,9 +191,9 @@
             "SSHPassword": "[coalesce(basics('SSHCredentials').password, basics('SSHCredentials').sshPublicKey)]",
             "sshKey": "[coalesce(basics('SSHCredentials').password, basics('SSHCredentials').sshPublicKey)]",
             "virtualNetworkNewOrExisting": "[steps('instanceDetails').vnetSpec.newOrExisting]",
-            "virtualNetworkRG": "[steps('instanceDetails').vnetSpec.resourceGroup]",
+            "virtualNetworkResourceGroupName": "[steps('instanceDetails').vnetSpec.resourceGroup]",
             "virtualNetworkName": "[steps('instanceDetails').vnetSpec.name]",
-            "virtualNetworkAddressPrefix": "[steps('instanceDetails').vnetSpec.addressPrefixs]",
+            "virtualNetworkAddressPrefix": "[steps('instanceDetails').vnetSpec.addressPrefixes]",
             "subnetWANName": "[steps('instanceDetails').vnetSpec.subnets.subnet1.name]",
             "subnetWANPrefix": "[steps('instanceDetails').vnetSpec.subnets.subnet1.addressPrefix]",
             "subnetLANName": "[steps('instanceDetails').vnetSpec.subnets.subnet2.name]",

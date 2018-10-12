@@ -125,10 +125,8 @@
       "defaultValue": "firewallVnet"
     },
     "virtualNetworkAddressPrefix": {
-      "type": "array",
-      "defaultValue": [
-        "192.168.0.0/16"
-      ],
+      "type": "string",
+      "defaultValue": "192.168.0.0/16",
       "metadata": {
         "description": "Virtual network address CIDR"
       }
@@ -270,7 +268,9 @@
       ],
       "properties": {
         "addressSpace": {
-          "addressPrefixes": "[parameters('virtualNetworkAddressPrefix')]"
+          "addressPrefixes": [
+		  "[parameters('virtualNetworkAddressPrefix')]"
+	  ]
         },
         "subnets": [
           {
