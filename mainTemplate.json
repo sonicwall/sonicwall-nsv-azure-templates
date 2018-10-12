@@ -35,16 +35,9 @@
     },
     "existingStorageAccountRG": {
       "type": "string",
-      "defaultValue": "",
+      "defaultValue": "[resourceGroup().Name]",
       "metadata": {
         "description": "Storage Resource Group of the Existing VM."
-      }
-    },
-    "userStorageContainerName": {
-      "type": "string",
-      "defaultValue": "vhd",
-      "metadata": {
-        "description": "Storage container name."
       }
     },
     "vmName": {
@@ -84,6 +77,13 @@
         "description": "SSH rsa public key file as a string."
       }
     },
+    "imageSkuType": {
+      "type": "string",
+      "defaultValue": "byol",
+      "metadata": {
+        "description": "The type of SKU byol or payg typically"
+      }
+    },
     "managementAccessIPSource": {
       "type": "string",
       "metadata": {
@@ -108,7 +108,14 @@
       "metadata": {
         "artifactsBaseUrl": ""
       },
-      "defaultValue": "https://raw.githubusercontent.com/sonicwall/nsv-azure-templates/master"
+      "defaultValue": "https://raw.githubusercontent.com/sonicwall/sonicwall-nsv-azure-templates/master"
+    },
+    "virtualNetworkNewOrExisting": {
+      "type": "string",
+      "defaultValue": "new",
+      "metadata": {
+        "description": "Determines whether or not a new virtual network should be provisioned."
+      }
     },
     "virtualNetworkName": {
       "type": "string",
@@ -204,17 +211,15 @@
     }
   },
   "variables": {
-    "apiVersion": "2015-06-15",
     "imagePublisher": "sonicwall-inc",
-    "imageSku" : "snwl-nsv-beta-p",
+    "imageSku" : "['snwl-nsv-',concat(parameters('imageSkuType'))]",
     "imageOffer" : "sonicwall-nsz-azure",
     "nicName": "[concat(parameters('vmName'), '-interface')]",
     "publicIPAddressType": "Dynamic",
     "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',parameters('virtualNetworkName'))]",
-    "nsgname-mgmt": "[concat(parameters('vmName'), '-NSG')]",
     "subnetWANRef": "[concat(variables('vnetID'),'/subnets/',parameters('subnetWANName'))]",
     "subnetLANRef": "[concat(variables('vnetID'),'/subnets/',parameters('subnetLANName'))]",
-    "storageAccountSetupURL": "[concat(parameters('baseUrl'),'/storage-',parameters('storageAccountNewOrExisting'),'.json')]",
+    "nsgname-mgmt": "[concat(parameters('vmName'), '-NSG')]",
     "publicIpAddressId": {
       "id": "[resourceId(parameters('publicIpResourceGroupName'), 'Microsoft.Network/publicIPAddresses', parameters('publicIpName'))]"
     },
@@ -222,29 +227,14 @@
   },
   "resources": [
     {
-      "name": "storageAcountSetup1",
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2015-01-01",
-      "properties": {
-        "mode": "Incremental",
-        "templateLink": {
-          "uri": "[variables('storageAccountSetupURL')]",
-          "contentVersion": "1.0.0.0"
-        },
-        "parameters": {
-          "location": {
-            "value": "[parameters('location')]"
-          },
-          "storageAccountType": {
-            "value": "[parameters('storageAccountType')]"
-          },
-          "storageAccount": {
-            "value": "[parameters('storageAccount')]"
-          },
-          "storageAccountExistingRG": {
-            "value": "[parameters('existingStorageAccountRG')]"
-          }
-        }
+      "condition": "[equals(parameters('storageAccountNewOrExisting'), 'new')]",
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2018-02-01",
+      "name": "[parameters('storageAccount')]",
+      "location": "[parameters('location')]",
+      "kind": "Storage",
+      "sku": {
+        "name": "[parameters('storageAccountType')]"
       }
     },
     {
@@ -264,7 +254,41 @@
       }
     },
     {
-      "apiVersion": "[variables('apiVersion')]",
+      "condition": "[equals(parameters('virtualNetworkNewOrExisting'), 'new')]",
+      "type": "Microsoft.Network/virtualNetworks",
+      "apiVersion": "2018-04-01",
+      "name": "[parameters('virtualNetworkName')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkSecurityGroups/', variables('nsgname-mgmt'))]"
+      ],
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+		  "[parameters('virtualNetworkAddressPrefix')]"
+	  ]
+        },
+        "subnets": [
+          {
+            "name": "[parameters('subnetWANName')]",
+            "properties": {
+              "addressPrefix": "[parameters('subnetWANPrefix')]",
+              "networkSecurityGroup": {
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgname-mgmt'))]"
+              }
+            }
+          },
+          {
+            "name": "[parameters('subnetLANName')]",
+            "properties": {
+              "addressPrefix": "[parameters('subnetLANPrefix')]"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "2018-04-01",
       "type": "Microsoft.Network/networkSecurityGroups",
       "name": "[concat(parameters('vmName'), '-NSG')]",
       "location": "[parameters('location')]",
@@ -386,46 +410,14 @@
       }
     },
     {
-      "apiVersion": "[variables('apiVersion')]",
-      "type": "Microsoft.Network/virtualNetworks",
-      "name": "[parameters('virtualNetworkName')]",
-      "location": "[parameters('location')]",
-      "dependsOn": [
-        "[concat('Microsoft.Network/networkSecurityGroups/', variables('nsgname-mgmt'))]"
-      ],
-      "properties": {
-        "addressSpace": {
-          "addressPrefixes": [
-            "[parameters('virtualNetworkAddressPrefix')]"
-          ]
-        },
-        "subnets": [
-          {
-            "name": "[parameters('subnetWANName')]",
-            "properties": {
-              "addressPrefix": "[parameters('subnetWANPrefix')]",
-              "networkSecurityGroup": {
-                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgname-mgmt'))]"
-              }
-            }
-          },
-          {
-            "name": "[parameters('subnetLANName')]",
-            "properties": {
-              "addressPrefix": "[parameters('subnetLANPrefix')]"
-            }
-          }
-        ]
-      }
-    },
-    {
-      "apiVersion": "[variables('apiVersion')]",
+      "apiVersion": "2018-04-01",
       "type": "Microsoft.Network/networkInterfaces",
       "name": "[concat(variables('nicName'), '-X1')]",
       "location": "[parameters('location')]",
       "dependsOn": [
         "[parameters('publicIpName')]",
-        "[concat('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkName'))]"
+        "[parameters('virtualNetworkName')]",
+        "[variables('nsgname-mgmt')]"
       ],
       "tags": {
         "displayName": "[concat('NetworkInterfaces', '-X1')]"
@@ -437,9 +429,7 @@
             "name": "[concat('ipconfig', '1')]",
             "properties": {
               "privateIPAllocationMethod": "Dynamic",
-              "publicIPAddress": {
-                "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIpName'))]"
-              },
+	      "publicIPAddress": "[if(not(equals(parameters('publicIpNewOrExisting'), 'none')), variables('publicIpAddressId') , json('null'))]",
               "subnet": {
                 "id": "[variables(concat('subnet','WAN','Ref'))]"
               }
@@ -449,12 +439,12 @@
       }
     },
     {
-      "apiVersion": "[variables('apiVersion')]",
+      "apiVersion": "2018-04-01",
       "type": "Microsoft.Network/networkInterfaces",
       "name": "[concat(variables('nicName'), '-X0')]",
       "location": "[parameters('location')]",
       "dependsOn": [
-        "[concat('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkName'))]"
+        "[parameters('virtualNetworkName')]"
       ],
       "tags": {
         "displayName": "[concat('NetworkInterfaces', '-X0')]"
@@ -477,9 +467,9 @@
     {
       "name": "SonicWall-NSv-VM",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2015-01-01",
+      "apiVersion": "2018-05-01",
       "dependsOn": [
-        "storageAcountSetup1",
+        "[parameters('storageAccount')]",
         "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'), '-X1')]",
         "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'), '-X0')]"
       ],

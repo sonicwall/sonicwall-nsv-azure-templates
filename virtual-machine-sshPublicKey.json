@@ -37,12 +37,11 @@
     }
   },
   "variables": {
-        "apiVersion": "2015-06-15",
 	"sshKeyPath": "[concat('/home/',parameters('SSHUserName'),'/.ssh/authorized_keys')]"
   },
   "resources": [
   {
-        "apiVersion": "[variables('apiVersion')]",
+        "apiVersion": "2018-04-01",
         "type": "Microsoft.Compute/virtualMachines",
         "name": "[parameters('vmName')]",
         "location": "[parameters('location')]",
@@ -78,10 +77,6 @@
                     "version": "latest"
                 },
                 "osDisk": {
-                    "name": "osdisk",
-                    "vhd": {
-                        "uri": "[concat('http://', parameters('storageAccount'), '.blob.core.windows.net/vhds/', parameters('vmName'), '-', parameters('imageOffer'), '-', parameters('imageSku'), '.vhd')]"
-                    },
                     "caching": "ReadWrite",
                     "createOption": "FromImage"
                 }
