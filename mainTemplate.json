@@ -212,7 +212,7 @@
   },
   "variables": {
     "imagePublisher": "sonicwall-inc",
-    "imageSku" : "['snwl-nsv-',concat(parameters('imageSkuType'))]",
+    "imageSku" : "[concat('snwl-nsv-',parameters('imageSkuType'))]",
     "imageOffer" : "sonicwall-nsz-azure",
     "nicName": "[concat(parameters('vmName'), '-interface')]",
     "publicIPAddressType": "Dynamic",
