@@ -1,0 +1,216 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/0.1.2-preview/CreateUIDefinition.MultiVm.json#",
+    "handler": "Microsoft.Compute.MultiVm",
+    "version": "0.1.2-preview",
+    "parameters": {
+        "basics": [
+            {
+                "name": "vmName",
+                "type": "Microsoft.Common.TextBox",
+                "label": "VM Name",
+                "toolTip": "The name of the new VM instance.",
+                "constraints": {
+                    "required": true,
+                    "regex": "^[a-zA-Z0-9]{3,24}$",
+                    "validationMessage": "VM names must be between 3 and 24 characters long, and can contain only numbers and letters."
+                }
+            },
+            {
+                "name": "usernameinfo",
+                "type": "Microsoft.Common.InfoBox",
+                "visible": true,
+                "options": {
+                    "icon": "None",
+                    "text": "SSH username: \"management\""
+                }
+            },
+            {
+                "name": "SSHCredentials",
+                "type": "Microsoft.Compute.CredentialsCombo",
+                "label": {
+                    "authenticationType": "Authentication type",
+                    "password": "Password",
+                    "confirmPassword": "Confirm password",
+                    "sshPublicKey": "SSH public key"
+                },
+                "toolTip": {
+                    "authenticationType": "Authentication Type for the SonicWall NSv",
+                    "password": "Password for the Virtual Machine",
+                    "sshPublicKey": "SSH Public Key for the SonicWall NSv"
+                },
+                "constraints": {
+                    "required": true
+                },
+                "options": {
+                    "hideConfirmation": false
+                },
+                "osPlatform": "Linux"
+            }
+        ],
+        "steps": [
+            {
+                "name": "instanceDetails",
+                "label": "Instance Details",
+                "subLabel": {
+                    "preValidation": "Configure Instance Details",
+                    "postValidation": "Done"
+                },
+                "bladeTitle": "Instance Details",
+                "elements": [
+                    {
+                        "name": "vmSize",
+                        "type": "Microsoft.Compute.SizeSelector",
+                        "label": "Virtual machine size",
+                        "toolTip": "The size of VM to provision.",
+                        "recommendedSizes": [
+                            "Standard_D2_v2",
+                            "Standard_D3_v2",
+                            "Standard_D4_v2",
+                            "Standard_D5_v2"
+                        ],
+                        "constraints": {
+                            "allowedSizes": [
+                                "Standard_D2_v2",
+                                "Standard_D3_v2",
+                                "Standard_D4_v2",
+                                "Standard_D5_v2"
+                            ]
+                        },
+                        "osPlatform": "Linux",
+                        "imageReference": {
+                            "publisher": "sonicwall-inc",
+                            "offer": "sonicwall-nsz-azure",
+                            "sku": "snwl-nsv-byol"
+                        },
+                        "count": "1"
+                    },
+                    {
+                        "name": "vnetSpec",
+                        "type": "Microsoft.Network.VirtualNetworkCombo",
+                        "label": {
+                            "virtualNetwork": "Virtual Network",
+                            "subnets": "Subnets"
+                        },
+                        "toolTip": {
+                            "virtualNetwork": "Virtual Network the instance will be placed in.",
+                            "subnets": "Subnet definitons for WAN and LAN zone."
+                        },
+                        "defaultValue": {
+                            "name": "fwVirtualNet",
+                            "addressPrefixSize": "/16"
+                        },
+                        "constraints": {
+                            "minAddressPrefixSize": "/29"
+                        },
+                        "subnets": {
+                            "subnet1": {
+                                "label": "WAN X1 subnet",
+                                "defaultValue": {
+                                    "name": "WAN-X1",
+                                    "addressPrefixSize": "/24"
+                                },
+                                "constraints": {
+                                    "minAddressPrefixSize": "/29",
+                                    "minAddressCount": 1,
+                                    "requireContiguousAddresses": true
+                                }
+                            },
+                            "subnet2": {
+                                "label": "LAN X0 subnet",
+                                "defaultValue": {
+                                    "name": "LAN-X0",
+                                    "addressPrefixSize": "/24"
+                                },
+                                "constraints": {
+                                    "minAddressPrefixSize": "/29",
+                                    "minAddressCount": 4,
+                                    "requireContiguousAddresses": true
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "name": "publicIpAddress",
+                        "type": "Microsoft.Network.PublicIpAddressCombo",
+                        "label": {
+                            "publicIpAddress": "Public IP Address",
+                            "domainNameLabel": "DNS Prefix for the public IP Address"
+                        },
+                        "toolTip": {
+                            "publicIpAddress": "Public IP Address for the SonicWall NSv",
+                            "domainNameLabel": "DNS Prefix for the public IP Address, must be globally unique"
+                        },
+                        "defaultValue": {
+                            "publicIpAddressName": "[concat(basics('vmName'), '-ip')]",
+                            "domainNameLabel": "[concat(basics('vmName'), '-', take(replace(guid(), '-', ''), 10))]"
+                        },
+                        "constraints": {
+                            "required": {
+                                "domainNameLabel": true
+                            }
+                        },
+                        "options": {
+                            "hideExisting": false,
+                            "hideNone": false
+                        }
+                    },
+                    {
+                        "name": "managementCidr",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Management source IP",
+                        "toolTip": "Public IP address allowed access SonicWall NSv HTTPS & SSH management",
+                        "constraints": {
+                            "required": true,
+                            "regex": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$",
+                            "validationMessage": "Please enter a valid IPv4 address"
+                        },
+                        "visible": true
+                    },
+                    {
+                        "name": "storageSpec",
+                        "type": "Microsoft.Storage.StorageAccountSelector",
+                        "label": "Storage Account",
+                        "toolTip": "Storage account to be used for disk blobs and diagnostics.",
+                        "defaultValue": {
+                            "type": "Standard_LRS"
+                        },
+                        "constraints": {
+                            "allowedTypes": [
+                                "Standard_LRS",
+                                "Standard_GRS"
+                            ]
+                        }
+                    }
+                ]
+            }
+        ],
+        "outputs": {
+            "vmName": "[basics('vmName')]",
+            "vmSize": "[steps('instanceDetails').vmSize]",
+            "authenticationType": "[basics('SSHCredentials').authenticationType]",
+            "SSHPassword": "[coalesce(basics('SSHCredentials').password, basics('SSHCredentials').sshPublicKey)]",
+            "sshKey": "[coalesce(basics('SSHCredentials').password, basics('SSHCredentials').sshPublicKey)]",
+            "virtualNetworkNewOrExisting": "[steps('instanceDetails').vnetSpec.newOrExisting]",
+            "virtualNetworkResourceGroupName": "[steps('instanceDetails').vnetSpec.resourceGroup]",
+            "virtualNetworkName": "[steps('instanceDetails').vnetSpec.name]",
+            "virtualNetworkAddressPrefix": "[steps('instanceDetails').vnetSpec.addressPrefixes]",
+            "subnetWANName": "[steps('instanceDetails').vnetSpec.subnets.subnet1.name]",
+            "subnetWANPrefix": "[steps('instanceDetails').vnetSpec.subnets.subnet1.addressPrefix]",
+            "subnetLANName": "[steps('instanceDetails').vnetSpec.subnets.subnet2.name]",
+            "subnetLANPrefix": "[steps('instanceDetails').vnetSpec.subnets.subnet2.addressPrefix]",
+            "storageAccountNewOrExisting": "[steps('instanceDetails').storageSpec.newOrExisting]",
+            "existingStorageAccountRG": "[steps('instanceDetails').storageSpec.resourceGroup]",
+            "storageAccount": "[steps('instanceDetails').storageSpec.name]",
+            "storageAccountType": "[steps('instanceDetails').storageSpec.type]",
+            "imageSkuType": "[steps('instanceDetails').license]",
+            "managementAccessIPSource": "[steps('instanceDetails').managementCidr]",
+            "publicIpNewOrExisting": "[steps('instanceDetails').publicIpAddress.newOrExistingOrNone]",
+            "publicIpName": "[steps('instanceDetails').publicIpAddress.name]",
+            "publicIpDns": "[steps('instanceDetails').publicIpAddress.domainNameLabel]",
+            "publicIpResourceGroupName": "[steps('instanceDetails').publicIpAddress.resourceGroup]",
+            "publicIPAllocationMethod": "[steps('instanceDetails').publicIpAddress.publicIPAllocationMethod]",
+            "publicIpSku": "[steps('instanceDetails').publicIpAddress.sku]",
+            "location": "[location()]"
+        }
+    }
+}

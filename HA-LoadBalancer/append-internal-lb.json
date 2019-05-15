@@ -1,0 +1,188 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "subnetLANName": {
+            "type": "string"
+        },
+        "virtualNetworkResourceGroupName": {
+            "type": "string"
+        },
+        "virtualNetworkName": {
+            "type": "string"
+        },
+        "vmName": {
+            "type": "string"
+        },
+        "location": {
+            "type": "string"
+        }
+    },
+    "variables": {
+        "vm1NicName": "[concat(parameters('vmName'), '-HA1-interface')]",
+        "vm2NicName": "[concat(parameters('vmName'), '-HA2-interface')]",
+        "ilbName": "[concat(parameters('vmName'), '-ILB')]",
+        "ilbID": "[resourceId('Microsoft.Network/loadBalancers',variables('ilbName'))]",
+        "ilbPoolID": "[concat(variables('ilbID'),'/backendAddressPools/BackendPoolLan')]",
+        "ilbProbeID": "[concat(variables('ilbID'),'/probes/tcpProbe')]",
+        "ilbFrontEndIPConfigID": "[concat(variables('ilbID'),'/frontendIPConfigurations/LoadBalancerFrontEnd')]",
+        "vnetID": "[resourceId(parameters('virtualNetworkResourceGroupName'), 'Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",
+        "lanSubnetID": "[concat(resourceId(parameters('virtualNetworkResourceGroupName'), 'Microsoft.Network/virtualNetworks', parameters('virtualNetworkName')), '/subnets/', parameters('subnetLANName'))]",
+        "lanRtName": "[concat(parameters('virtualNetworkName'), '-', parameters('subnetLANName'), '-RT')]"
+    },
+    "resources": [
+        {
+            "apiVersion": "2018-11-01",
+            "name": "[variables('ilbName')]",
+            "type": "Microsoft.Network/loadBalancers",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "Standard"
+            },
+            "properties": {
+                "frontendIPConfigurations": [
+                    {
+                        "name": "LoadBalancerFrontEnd",
+                        "properties": {
+                            "subnet": {
+                                "id": "[resourceId(parameters('virtualNetworkResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets/', parameters('virtualNetworkName'), parameters('subnetLANName'))]"
+                            }
+                        }
+                    }
+                ],
+                "backendAddressPools": [
+                    {
+                        "name": "BackendPoolLan"
+                    }
+                ],
+                "loadBalancingRules": [
+                    {
+                        "name": "ILBRule",
+                        "properties": {
+                            "frontendIPConfiguration": {
+                                "id": "[variables('ilbFrontEndIPConfigID')]"
+                            },
+                            "backendAddressPool": {
+                                "id": "[variables('ilbPoolID')]"
+                            },
+                            "protocol": "All",
+                            "frontendPort": 0,
+                            "enableFloatingIP": false,
+                            "idleTimeoutInMinutes": 5,
+                            "probe": {
+                                "id": "[variables('ilbProbeID')]"
+                            }
+                        }
+                    }
+                ],
+                "probes": [
+                    {
+                        "name": "tcpProbe",
+                        "properties": {
+                            "protocol": "Tcp",
+                            "port": 443,
+                            "intervalInSeconds": 5,
+                            "numberOfProbes": 2
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/routeTables",
+            "apiVersion": "2018-11-01",
+            "name": "[variables('lanRtName')]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "routes": [
+                    {
+                        "name": "[concat(parameters('subnetLANName'), '-Default-Route')]",
+                        "properties": {
+                            "addressPrefix": "0.0.0.0/0",
+                            "nextHopType": "VirtualAppliance",
+                            "nextHopIpAddress": "[reference(variables('ilbFrontEndIPConfigID'), '2018-11-01').privateIPAddress]"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "apiVersion": "2015-01-01",
+            "type": "Microsoft.Resources/deployments",
+            "name": "updateIlbBackendPool",
+            "dependsOn": [
+                "[variables('ilbName')]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "parameters": {},
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {},
+                    "variables": {},
+                    "resources": [
+                        {
+                            "apiVersion": "2018-04-01",
+                            "type": "Microsoft.Network/networkInterfaces",
+                            "name": "[concat(variables('vm1NicName'), '-X0')]",
+                            "location": "[parameters('location')]",
+                            "properties": {
+                                "ipConfigurations": [
+                                    {
+                                        "name": "[concat('ipconfig', '2')]",
+                                        "properties": {
+                                            "subnet": {
+                                                "id": "[resourceId(parameters('virtualNetworkResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets/', parameters('virtualNetworkName'), parameters('subnetLANName'))]"
+                                            },
+                                            "loadBalancerBackendAddressPools": [
+                                                {
+                                                    "id": "[concat(variables('ilbID'), '/backendAddressPools/BackendPoolLan')]"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "apiVersion": "2018-04-01",
+                            "type": "Microsoft.Network/networkInterfaces",
+                            "name": "[concat(variables('vm2NicName'), '-X0')]",
+                            "location": "[parameters('location')]",
+                            "properties": {
+                                "ipConfigurations": [
+                                    {
+                                        "name": "[concat('ipconfig', '2')]",
+                                        "properties": {
+                                            "subnet": {
+                                                "id": "[resourceId(parameters('virtualNetworkResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets/', parameters('virtualNetworkName'), parameters('subnetLANName'))]"
+                                            },
+                                            "loadBalancerBackendAddressPools": [
+                                                {
+                                                    "id": "[concat(variables('ilbID'), '/backendAddressPools/BackendPoolLan')]"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "type": "Microsoft.Network/virtualNetworks/subnets",
+                            "apiVersion": "2018-07-01",
+                            "name": "[concat(parameters('virtualNetworkName'), '/', parameters('subnetLANName'))]",
+                            "location": "[parameters('location')]",
+                            "properties": {
+                                "addressPrefix": "[reference(variables('lanSubnetID'), '2018-04-01').addressPrefix]",
+                                "routeTable": {
+                                    "id": "[resourceId('Microsoft.Network/routeTables', variables('lanRtName'))]"
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    ]
+}
