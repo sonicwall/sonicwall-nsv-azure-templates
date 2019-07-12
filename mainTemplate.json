@@ -40,13 +40,6 @@
         "description": "Storage Resource Group of the Existing VM."
       }
     },
-    "vmSku": {
-      "type": "string",
-      "defaultValue": "[resourceGroup().Name]",
-      "metadata": {
-        "description": "Name of SonicWall-NSv VM in the Azure portal"
-      }
-    },
     "vmName": {
       "type": "string",
       "defaultValue": "new",
