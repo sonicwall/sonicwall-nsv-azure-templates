@@ -1,0 +1,87 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "value": "[resourceGroup().Location]"
+    },
+    "storageAccount": {
+      "value": null
+    },
+    "storageAccountType": {
+      "value": "Standard_LRS"
+    },
+    "storageAccountNewOrExisting": {
+      "value": "new"
+    },
+    "existingStorageAccountRG": {
+      "value": null
+    },
+    "userStorageContainerName": {
+      "value": "vhd"
+    },
+    "vmName": {
+      "value": null
+    },
+    "SSHUserName": {
+      "value": "management"
+    },
+    "authenticationType": {
+      "value": "password"
+    },
+    "SSHPassword": {
+      "value": null
+    },
+    "sshKey": {
+      "value": null
+    },
+    "imageSku": {
+      "value": "snwl-nsv-byol"
+    },
+    "managementAccessIPSource": {
+      "value": null
+    },
+    "vmSize": {
+      "value": "Standard_D3_v2"
+    },
+    "baseUrl": {
+      "value": "https://raw.githubusercontent.com/sonicwall/nsv-azure-templates/master"
+    },
+    "virtualNetworkName": {
+      "value": "firewallVnet"
+    },
+    "virtualNetworkAddressPrefix": {
+      "value": "192.168.0.0/16"
+    },
+    "subnetWANName": {
+      "value": "WAN-X1"
+    },
+    "subnetLANName": {
+      "value": "LAN-X0"
+    },
+    "subnetWANPrefix": {
+      "value": "192.168.1.0/24"
+    },
+    "subnetLANPrefix": {
+      "value": "192.168.2.0/24"
+    },
+    "publicIpNewOrExisting": {
+      "value": "new"
+    },
+    "publicIpName": {
+      "value": "PublicIp"
+    },
+    "publicIpDns": {
+      "value": "[concat('sonicwall-nsv-', uniqueString(resourceGroup().id))]"
+    },
+    "publicIpResourceGroupName": {
+      "value": "[resourceGroup().name]"
+    },
+    "publicIpAllocationMethod": {
+      "value": "Dynamic"
+    },
+    "publicIpSku": {
+      "value": "Basic"
+    }
+  }
+}
