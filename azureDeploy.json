@@ -3,11 +3,11 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "location": {
-        "type": "string",
-        "defaultValue": "[resourceGroup().Location]",
-        "metadata": {
-            "description": "Geo-Location to deploy SonicWall NSv"
-        }
+      "type": "string",
+      "defaultValue": "[resourceGroup().Location]",
+      "metadata": {
+        "description": "Geo-Location to deploy SonicWall NSv"
+      }
     },
     "storageAccount": {
       "type": "string",
@@ -33,24 +33,17 @@
         "Description": "Indicates whether the Storage Account is new or existing"
       }
     },
-    "existingStorageAccountRG": {
+    "storageAccountResourceGroupName": {
       "type": "string",
       "defaultValue": "[resourceGroup().Name]",
       "metadata": {
-        "description": "Storage Resource Group of the Existing VM."
+        "description": "Existing Storage Resource Group"
       }
     },
     "vmName": {
       "type": "string",
       "metadata": {
         "description": "Name of SonicWall-NSv VM in the Azure portal"
-      }
-    },
-    "SSHUserName": {
-      "type": "string",
-      "defaultValue": "management",
-      "metadata": {
-        "description": "Username for SSH access to SonicWall-NSv console"
       }
     },
     "authenticationType": {
@@ -77,11 +70,11 @@
         "description": "SSH rsa public key file as a string."
       }
     },
-    "imageSkuType": {
+    "imageSku": {
       "type": "string",
-      "defaultValue": "byol",
+      "defaultValue": "snwl-nsv-byol",
       "metadata": {
-        "description": "The type of SKU byol or payg typically"
+        "description": "The name of the Azure product SKU to load"
       }
     },
     "managementAccessIPSource": {
@@ -108,7 +101,7 @@
       "metadata": {
         "artifactsBaseUrl": ""
       },
-      "defaultValue": "https://raw.githubusercontent.com/sonicwall/sonicwall-nsv-azure-templates/master"
+      "defaultValue": "https://catalogartifact.azureedge.net/publicartifacts/sonicwall-inc.sonicwall-nsv-firewall-security-vpn-router-1a995416-a603-4bf8-a52d-4c1914119f19-snwl-nsv-byol-sltn/Artifacts"
     },
     "virtualNetworkNewOrExisting": {
       "type": "string",
@@ -219,17 +212,30 @@
   },
   "variables": {
     "imagePublisher": "sonicwall-inc",
-    "imageSku" : "[concat('snwl-nsv-',parameters('imageSkuType'))]",
-    "imageOffer" : "sonicwall-nsz-azure",
+    "imageOffer": "sonicwall-nsz-azure",
     "nicName": "[concat(parameters('vmName'), '-interface')]",
     "publicIPAddressType": "Dynamic",
     "nsgname-mgmt": "[concat(parameters('vmName'), '-NSG')]",
+    "SSHUserName": "management",
     "publicIpAddressId": {
       "id": "[resourceId(parameters('publicIpResourceGroupName'), 'Microsoft.Network/publicIPAddresses', parameters('publicIpName'))]"
     },
     "vmTemplateUrl": "[concat(parameters('baseUrl'), '/virtual-machine-', parameters('authenticationType'),'.json')]"
   },
   "resources": [
+    {
+      "apiVersion": "2018-02-01",
+      "name": "pid-b2c3737d-57f9-526e-953d-ebcc448a3a6a",
+      "type": "Microsoft.Resources/deployments",
+      "properties": {
+        "mode": "Incremental",
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "resources": []
+        }
+      }
+    },
     {
       "condition": "[equals(parameters('storageAccountNewOrExisting'), 'new')]",
       "type": "Microsoft.Storage/storageAccounts",
@@ -269,8 +275,8 @@
       "properties": {
         "addressSpace": {
           "addressPrefixes": [
-		  "[parameters('virtualNetworkAddressPrefix')]"
-	  ]
+            "[parameters('virtualNetworkAddressPrefix')]"
+          ]
         },
         "subnets": [
           {
@@ -433,9 +439,9 @@
             "name": "[concat('ipconfig', '1')]",
             "properties": {
               "privateIPAllocationMethod": "Dynamic",
-	      "publicIPAddress": "[if(not(equals(parameters('publicIpNewOrExisting'), 'none')), variables('publicIpAddressId') , json('null'))]",
+              "publicIPAddress": "[if(not(equals(parameters('publicIpNewOrExisting'), 'none')), variables('publicIpAddressId') , json('null'))]",
               "subnet": {
-                "id": "[resourceId(parameters('virtualNetworkResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets/', parameters('virtualNetworkName'), parameters('subnetWANName'))]" 
+                "id": "[resourceId(parameters('virtualNetworkResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets/', parameters('virtualNetworkName'), parameters('subnetWANName'))]"
               }
             }
           }
@@ -461,7 +467,7 @@
             "properties": {
               "privateIPAllocationMethod": "Dynamic",
               "subnet": {
-                "id": "[resourceId(parameters('virtualNetworkResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets/', parameters('virtualNetworkName'), parameters('subnetLANName'))]"  
+                "id": "[resourceId(parameters('virtualNetworkResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets/', parameters('virtualNetworkName'), parameters('subnetLANName'))]"
               }
             }
           }
@@ -491,7 +497,7 @@
             "value": "[parameters('vmName')]"
           },
           "imageSku": {
-            "value": "[variables('imageSku')]"
+            "value": "[parameters('imageSku')]"
           },
           "imageOffer": {
             "value": "[variables('imageOffer')]"
@@ -506,13 +512,16 @@
             "value": "[parameters('vmSize')]"
           },
           "SSHUserName": {
-            "value": "[parameters('SSHUserName')]"
+            "value": "[variables('SSHUserName')]"
           },
           "SSHPassword": {
             "value": "[parameters('SSHPassword')]"
           },
           "storageAccount": {
             "value": "[parameters('storageAccount')]"
+          },
+          "storageAccountResourceGroupName": {
+            "value": "[parameters('storageAccountResourceGroupName')]"
           },
           "sshKey": {
             "value": "[parameters('sshKey')]"

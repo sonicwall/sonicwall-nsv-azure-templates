@@ -42,6 +42,7 @@
     },
     "vmName": {
       "type": "string",
+      "defaultValue": "new",
       "metadata": {
         "description": "Name of SonicWall-NSv VM in the Azure portal"
       }
@@ -77,11 +78,11 @@
         "description": "SSH rsa public key file as a string."
       }
     },
-    "imageSkuType": {
+    "imageSku": {
       "type": "string",
-      "defaultValue": "byol",
+      "defaultValue": "snwl-nsv-byol",
       "metadata": {
-        "description": "The type of SKU byol or payg typically"
+        "description": "The name of the Azure product to load"
       }
     },
     "managementAccessIPSource": {
@@ -221,7 +222,6 @@
   },
   "variables": {
     "imagePublisher": "sonicwall-inc",
-    "imageSku" : "[concat('snwl-nsv-',parameters('imageSkuType'))]",
     "imageOffer" : "sonicwall-nsz-azure",
     "nicName": "[concat(parameters('vmName'), '-interface')]",
     "publicIPAddressType": "Dynamic",
@@ -491,7 +491,7 @@
             "value": "[parameters('vmName')]"
           },
           "imageSku": {
-            "value": "[variables('imageSku')]"
+            "value": "[parameters('imageSku')]"
           },
           "imageOffer": {
             "value": "[variables('imageOffer')]"
