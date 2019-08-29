@@ -523,6 +523,7 @@
       "location": "[parameters('location')]",
       "dependsOn": [
         "[parameters('virtualNetworkName')]",
+        "[variables('elbName')]",
         "[variables('nsgname-mgmt')]"
       ],
       "tags": {
@@ -586,6 +587,7 @@
       "location": "[parameters('location')]",
       "dependsOn": [
         "[parameters('virtualNetworkName')]",
+        "[variables('elbName')]",
         "[variables('nsgname-mgmt')]"
       ],
       "tags": {
