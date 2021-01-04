@@ -84,6 +84,13 @@
         "description": "The type of SKU byol or payg typically"
       }
     },
+    "imageVersion": {
+      "type": "string",
+      "defaultValue": "latest",
+      "metadata": {
+          "description": "The version of the loaded NSv image"
+      }
+  },
     "managementAccessIPSource": {
       "type": "string",
       "metadata": {
@@ -230,6 +237,9 @@
     "imagePublisher": "sonicwall-inc",
     "imageSku" : "[concat('snwl-nsv-',parameters('imageSkuType'))]",
     "imageOffer" : "sonicwall-nsz-azure",
+    "imageVersionNumberPrefix": "[if(equals(indexOf(parameters('imageVersion'), '.'), -1), '0.0.', '')]",
+    "imageVersionNumber": "[concat(variables('imageVersionNumberPrefix'), parameters('imageVersion'))]",
+    "imageVersion": "[if(equals(parameters('imageVersion'), 'latest'), 'latest', variables('imageVersionNumber'))]",
     "vm1Name": "[concat(parameters('vmName'), '-HA1')]",
     "vm2Name": "[concat(parameters('vmName'), '-HA2')]",
     "vm1NicName": "[concat(variables('vm1Name'), '-interface')]",
@@ -684,6 +694,9 @@
           "imageSku": {
             "value": "[variables('imageSku')]"
           },
+          "imageVersion": {
+            "value": "[variables('imageVersion')]"
+          },
           "imageOffer": {
             "value": "[variables('imageOffer')]"
           },
@@ -739,6 +752,9 @@
           },
           "imageSku": {
             "value": "[variables('imageSku')]"
+          },
+          "imageVersion": {
+            "value": "[variables('imageVersion')]"
           },
           "imageOffer": {
             "value": "[variables('imageOffer')]"
