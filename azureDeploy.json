@@ -444,6 +444,9 @@
       },
       "properties": {
         "enableIPForwarding": true,
+        "networkSecurityGroup": {
+          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgname-mgmt'))]"
+        },
         "ipConfigurations": [
           {
             "name": "[concat('ipconfig', '1')]",
