@@ -85,6 +85,13 @@
         "description": "The name of the Azure product to load"
       }
     },
+    "imageVersion": {
+      "type": "string",
+      "defaultValue": "latest",
+      "metadata": {
+        "description": "The version of loaded NSv image"
+      }
+    },
     "managementAccessIPSource": {
       "type": "string",
       "metadata": {
@@ -223,6 +230,9 @@
   "variables": {
     "imagePublisher": "sonicwall-inc",
     "imageOffer" : "sonicwall-nsz-azure",
+    "imageVersionNumberPrefix": "[if(equals(indexOf(parameters('imageVersion'), '.'), -1), '0.0.', '')]",
+    "imageVersionNumber": "[concat(variables('imageVersionNumberPrefix'), parameters('imageVersion'))]",
+    "imageVersion": "[if(equals(parameters('imageVersion'), 'latest'), 'latest', variables('imageVersionNumber'))]",
     "nicName": "[concat(parameters('vmName'), '-interface')]",
     "publicIPAddressType": "Dynamic",
     "nsgname-mgmt": "[concat(parameters('vmName'), '-NSG')]",
@@ -428,6 +438,9 @@
       },
       "properties": {
         "enableIPForwarding": true,
+        "networkSecurityGroup": {
+          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgname-mgmt'))]"
+        },
         "ipConfigurations": [
           {
             "name": "[concat('ipconfig', '1')]",
@@ -492,6 +505,9 @@
           },
           "imageSku": {
             "value": "[parameters('imageSku')]"
+          },
+          "imageVersion": {
+            "value": "[variables('imageVersion')]"
           },
           "imageOffer": {
             "value": "[variables('imageOffer')]"

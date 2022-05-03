@@ -84,6 +84,13 @@
         "description": "The type of SKU byol or payg typically"
       }
     },
+    "imageVersion": {
+      "type": "string",
+      "defaultValue": "latest",
+      "metadata": {
+          "description": "The version of the loaded NSv image"
+      }
+  },
     "managementAccessIPSource": {
       "type": "string",
       "metadata": {
@@ -230,12 +237,16 @@
     "imagePublisher": "sonicwall-inc",
     "imageSku" : "[concat('snwl-nsv-',parameters('imageSkuType'))]",
     "imageOffer" : "sonicwall-nsz-azure",
+    "imageVersionNumberPrefix": "[if(equals(indexOf(parameters('imageVersion'), '.'), -1), '0.0.', '')]",
+    "imageVersionNumber": "[concat(variables('imageVersionNumberPrefix'), parameters('imageVersion'))]",
+    "imageVersion": "[if(equals(parameters('imageVersion'), 'latest'), 'latest', variables('imageVersionNumber'))]",
     "vm1Name": "[concat(parameters('vmName'), '-HA1')]",
     "vm2Name": "[concat(parameters('vmName'), '-HA2')]",
     "vm1NicName": "[concat(variables('vm1Name'), '-interface')]",
     "vm2NicName": "[concat(variables('vm2Name'), '-interface')]",
     "publicIPAddressType": "Dynamic",
     "nsgname-mgmt": "[concat(parameters('vmName'), '-NSG')]",
+    "availabilitySetName": "[concat(parameters('vmName'), '-AvSet')]",
     "publicIpAddressId": "[resourceId(parameters('publicIpResourceGroupName'), 'Microsoft.Network/publicIPAddresses', parameters('publicIpName'))]",
     "elbName": "[concat(parameters('vmName'), '-ELB')]",
     "elbID": "[resourceId('Microsoft.Network/loadBalancers',variables('elbName'))]",
@@ -255,6 +266,19 @@
       "kind": "Storage",
       "sku": {
         "name": "[parameters('storageAccountType')]"
+      }
+    },
+    {
+      "type": "Microsoft.Compute/availabilitySets",
+      "name": "[variables('availabilitySetName')]",
+      "apiVersion": "2018-10-01",
+      "location": "[parameters('location')]",
+      "properties": {
+        "platformFaultDomainCount": 2,
+        "platformUpdateDomainCount": 5
+      },
+      "sku": {
+        "name": "Aligned"
       }
     },
     {
@@ -523,6 +547,7 @@
       "location": "[parameters('location')]",
       "dependsOn": [
         "[parameters('virtualNetworkName')]",
+        "[variables('elbName')]",
         "[variables('nsgname-mgmt')]"
       ],
       "tags": {
@@ -586,6 +611,7 @@
       "location": "[parameters('location')]",
       "dependsOn": [
         "[parameters('virtualNetworkName')]",
+        "[variables('elbName')]",
         "[variables('nsgname-mgmt')]"
       ],
       "tags": {
@@ -648,6 +674,7 @@
       "apiVersion": "2018-05-01",
       "dependsOn": [
         "[parameters('storageAccount')]",
+        "[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]",
         "[concat('Microsoft.Network/networkInterfaces/', variables('vm1NicName'), '-X1')]",
         "[concat('Microsoft.Network/networkInterfaces/', variables('vm1NicName'), '-X0')]"
       ],
@@ -666,6 +693,9 @@
           },
           "imageSku": {
             "value": "[variables('imageSku')]"
+          },
+          "imageVersion": {
+            "value": "[variables('imageVersion')]"
           },
           "imageOffer": {
             "value": "[variables('imageOffer')]"
@@ -688,6 +718,9 @@
           "storageAccount": {
             "value": "[parameters('storageAccount')]"
           },
+          "availabilitySetName": {
+            "value": "[variables('availabilitySetName')]"
+          },
           "sshKey": {
             "value": "[parameters('sshKey')]"
           }
@@ -700,6 +733,7 @@
       "apiVersion": "2018-05-01",
       "dependsOn": [
         "[parameters('storageAccount')]",
+        "[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]",
         "[concat('Microsoft.Network/networkInterfaces/', variables('vm2NicName'), '-X1')]",
         "[concat('Microsoft.Network/networkInterfaces/', variables('vm2NicName'), '-X0')]"
       ],
@@ -718,6 +752,9 @@
           },
           "imageSku": {
             "value": "[variables('imageSku')]"
+          },
+          "imageVersion": {
+            "value": "[variables('imageVersion')]"
           },
           "imageOffer": {
             "value": "[variables('imageOffer')]"
@@ -739,6 +776,9 @@
           },
           "storageAccount": {
             "value": "[parameters('storageAccount')]"
+          },
+          "availabilitySetName": {
+            "value": "[variables('availabilitySetName')]"
           },
           "sshKey": {
             "value": "[parameters('sshKey')]"

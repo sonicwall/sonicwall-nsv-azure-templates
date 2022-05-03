@@ -11,6 +11,9 @@
     "imageSku": {
       "type": "string"
     },
+    "imageVersion": {
+      "type": "string"
+    },
     "imageOffer": {
       "type": "string"
     },
@@ -32,6 +35,9 @@
     "storageAccount": {
       "type": "string"
     },
+    "availabilitySetName": {
+      "type": "string"
+    },
     "sshKey": {
       "type": "string"
     }
@@ -51,6 +57,9 @@
            "publisher": "[parameters('imagePublisher')]"
         },
         "properties": {
+            "availabilitySet": {
+              "id": "[resourceId('Microsoft.Compute/availabilitySets', parameters('availabilitySetName'))]"
+            },
             "hardwareProfile": {
                 "vmSize": "[parameters('vmSize')]"
             },
@@ -74,7 +83,7 @@
                     "publisher": "[parameters('imagePublisher')]",
                     "offer": "[parameters('imageOffer')]",
                     "sku": "[parameters('imageSku')]",
-                    "version": "latest"
+                    "version": "[parameters('imageVersion')]"
                 },
                 "osDisk": {
                     "caching": "ReadWrite",
