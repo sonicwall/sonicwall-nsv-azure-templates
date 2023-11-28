@@ -42,10 +42,10 @@
       "value": null
     },
     "vmSize": {
-      "value": "Standard_D3_v2"
+      "value": "Standard_DS3_v2"
     },
     "baseUrl": {
-      "value": "https://raw.githubusercontent.com/sonicwall/nsv-azure-templates/master"
+      "value": "https://raw.githubusercontent.com/sonicwall/nsv-azure-templates/vm_size"
     },
     "virtualNetworkName": {
       "value": "firewallVnet"

@@ -101,22 +101,22 @@
     "vmSize": {
       "type": "string",
       "allowedValues": [
-        "Standard_D2_v2",
-        "Standard_D3_v2",
-        "Standard_D4_v2",
-        "Standard_D5_v2"
+        "Standard_DS2_v2",
+        "Standard_DS3_v2",
+        "Standard_DS4_v2",
+        "Standard_DS5_v2"
       ],
       "metadata": {
-        "description": "Azure VM size for SonicWall-NSv model, select Standard_D2_v2 for NSv 200, select Standard_D3_v2 for NSv 400, select Standard_D4_v2 for NSv 800 and select Standard_D5_v2 for NSv 1600"
+        "description": "Azure VM size for SonicWall-NSv model, select Standard_DS2_v2 for NSv 200, select Standard_DS3_v2 for NSv 400, select Standard_DS4_v2 for NSv 800 and select Standard_DS5_v2 for NSv 1600"
       },
-      "defaultValue": "Standard_D3_v2"
+      "defaultValue": "Standard_DS3_v2"
     },
     "baseUrl": {
       "type": "string",
       "metadata": {
         "artifactsBaseUrl": ""
       },
-      "defaultValue": "https://raw.githubusercontent.com/sonicwall/sonicwall-nsv-azure-templates/master"
+      "defaultValue": "https://raw.githubusercontent.com/sonicwall/sonicwall-nsv-azure-templates/vm_size"
     },
     "virtualNetworkNewOrExisting": {
       "type": "string",

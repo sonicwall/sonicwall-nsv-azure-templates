@@ -63,17 +63,17 @@
                         "label": "Virtual machine size",
                         "toolTip": "The size of VM to provision.",
                         "recommendedSizes": [
-                            "Standard_D2_v2",
-                            "Standard_D3_v2",
-                            "Standard_D4_v2",
-                            "Standard_D5_v2"
+                            "Standard_DS2_v2",
+                            "Standard_DS3_v2",
+                            "Standard_DS4_v2",
+                            "Standard_DS5_v2"
                         ],
                         "constraints": {
                             "allowedSizes": [
-                                "Standard_D2_v2",
-                                "Standard_D3_v2",
-                                "Standard_D4_v2",
-                                "Standard_D5_v2"
+                                "Standard_DS2_v2",
+                                "Standard_DS3_v2",
+                                "Standard_DS4_v2",
+                                "Standard_DS5_v2"
                             ]
                         },
                         "osPlatform": "Linux",
