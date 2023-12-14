@@ -1,6 +1,6 @@
 {
     "$schema": "https://schema.management.azure.com/schemas/0.1.2-preview/CreateUIDefinition.MultiVm.json#",
-    "handler": "Microsoft.Compute.MultiVm",
+    "handler": "Microsoft.Azure.CreateUIDef",
     "version": "0.1.2-preview",
     "parameters": {
         "basics": [
@@ -58,22 +58,55 @@
                 "bladeTitle": "Instance Details",
                 "elements": [
                     {
-                        "name": "vmSize",
+                        "name": "nsvPlan",
+                        "type": "Microsoft.Common.DropDown",
+                        "label": "NSv plan",
+                        "defaultValue": "NSv 7.1 or newer",
+                        "toolTip": "The NSv plan (also known as SKU).",
+                        "constraints": {
+                            "allowedValues": [
+                                {
+                                    "label": "NSv 7.0",
+                                    "value": "snwl-nsv-byol"
+                                },
+                                {
+                                    "label": "NSv 7.1 or newer",
+                                    "value": "snwl-nsv-scx"
+                                }
+                            ],
+                            "required": true
+                        },
+                        "visible": true
+                    },
+                    {
+                        "name": "vmSizeSkuSc",
                         "type": "Microsoft.Compute.SizeSelector",
-                        "label": "Virtual machine size",
+                        "label": "Virtual machine size of the \"NSv 7.0\" plan",
                         "toolTip": "The size of VM to provision.",
                         "recommendedSizes": [
-                            "Standard_DS2_v2",
-                            "Standard_DS3_v2",
-                            "Standard_DS4_v2",
-                            "Standard_DS5_v2"
+                            "Standard_D2_v2",
+                            "Standard_D3_v2",
+                            "Standard_D4_v2",
+                            "Standard_D5_v2",
+							"Standard_B2ms",
+                            "Standard_B4ms",
+                            "Standard_D2ds_v4",
+                            "Standard_D2s_v4",
+                            "Standard_D2_v4",
+                            "Standard_DS3_v2"
                         ],
                         "constraints": {
                             "allowedSizes": [
-                                "Standard_DS2_v2",
-                                "Standard_DS3_v2",
-                                "Standard_DS4_v2",
-                                "Standard_DS5_v2"
+                                "Standard_D2_v2",
+                                "Standard_D3_v2",
+                                "Standard_D4_v2",
+                                "Standard_D5_v2",
+							    "Standard_B2ms",
+                                "Standard_B4ms",
+                                "Standard_D2ds_v4",
+                                "Standard_D2s_v4",
+                                "Standard_D2_v4",
+                                "Standard_DS3_v2"
                             ]
                         },
                         "osPlatform": "Linux",
@@ -82,7 +115,46 @@
                             "offer": "sonicwall-nsz-azure",
                             "sku": "snwl-nsv-byol"
                         },
-                        "count": "1"
+                        "count": "1",
+                        "visible": "[equals(steps('instanceDetails').nsvPlan, 'snwl-nsv-byol')]"
+                    },
+                    {
+                        "name": "vmSizeSkuScx",
+                        "type": "Microsoft.Compute.SizeSelector",
+                        "label": "Virtual machine size of the \"NSv 7.1 or newer\" plan",
+                        "toolTip": "The size of VM to provision.",
+                        "recommendedSizes": [
+                            "Standard_DS2_v2",
+                            "Standard_DS3_v2",
+                            "Standard_DS4_v2",
+                            "Standard_DS5_v2",
+                            "Standard_B2ms",
+                            "Standard_B4ms",
+                            "Standard_D2ds_v4",
+                            "Standard_D2s_v4",
+                            "Standard_D2_v4"
+                        ],
+                        "constraints": {
+                            "allowedSizes": [
+                                "Standard_DS2_v2",
+                                "Standard_DS3_v2",
+                                "Standard_DS4_v2",
+                                "Standard_DS5_v2",
+                                "Standard_B2ms",
+                                "Standard_B4ms",
+                                "Standard_D2ds_v4",
+                                "Standard_D2s_v4",
+                                "Standard_D2_v4"
+                            ]
+                        },
+                        "osPlatform": "Linux",
+                        "imageReference": {
+                            "publisher": "sonicwall-inc",
+                            "offer": "sonicwall-nsz-azure",
+                            "sku": "snwl-nsv-scx"
+                        },
+                        "count": "1",
+                        "visible": "[equals(steps('instanceDetails').nsvPlan, 'snwl-nsv-scx')]"
                     },
                     {
                         "name": "vnetSpec",
@@ -186,7 +258,9 @@
         ],
         "outputs": {
             "vmName": "[basics('vmName')]",
-            "vmSize": "[steps('instanceDetails').vmSize]",
+            "imageSku": "[steps('instanceDetails').nsvPlan]",
+            "vmSizeSc": "[steps('instanceDetails').vmSizeSkuSc]",
+            "vmSizeScx": "[steps('instanceDetails').vmSizeSkuScx]",
             "authenticationType": "[basics('SSHCredentials').authenticationType]",
             "SSHPassword": "[coalesce(basics('SSHCredentials').password, basics('SSHCredentials').sshPublicKey)]",
             "sshKey": "[coalesce(basics('SSHCredentials').password, basics('SSHCredentials').sshPublicKey)]",
@@ -199,10 +273,9 @@
             "subnetLANName": "[steps('instanceDetails').vnetSpec.subnets.subnet2.name]",
             "subnetLANPrefix": "[steps('instanceDetails').vnetSpec.subnets.subnet2.addressPrefix]",
             "storageAccountNewOrExisting": "[steps('instanceDetails').storageSpec.newOrExisting]",
-            "existingStorageAccountRG": "[steps('instanceDetails').storageSpec.resourceGroup]",
+            "storageAccountResourceGroupName": "[steps('instanceDetails').storageSpec.resourceGroup]",
             "storageAccount": "[steps('instanceDetails').storageSpec.name]",
             "storageAccountType": "[steps('instanceDetails').storageSpec.type]",
-            "imageSkuType": "[steps('instanceDetails').license]",
             "managementAccessIPSource": "[steps('instanceDetails').managementCidr]",
             "publicIpNewOrExisting": "[steps('instanceDetails').publicIpAddress.newOrExistingOrNone]",
             "publicIpName": "[steps('instanceDetails').publicIpAddress.name]",

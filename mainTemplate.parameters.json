@@ -36,16 +36,13 @@
       "value": null
     },
     "imageSku": {
-      "value": "snwl-nsv-byol"
+      "value": "snwl-nsv-scx"
     },
     "managementAccessIPSource": {
       "value": null
     },
-    "vmSize": {
-      "value": "Standard_DS3_v2"
-    },
-    "baseUrl": {
-      "value": "https://raw.githubusercontent.com/sonicwall/nsv-azure-templates/vm_size"
+    "nsvModel": {
+      "value": "NSv 470"
     },
     "virtualNetworkName": {
       "value": "firewallVnet"
