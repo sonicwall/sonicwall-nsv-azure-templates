@@ -116,7 +116,7 @@
       "metadata": {
         "artifactsBaseUrl": ""
       },
-      "defaultValue": "https://raw.githubusercontent.com/sonicwall/sonicwall-nsv-azure-templates/master"
+      "defaultValue": "https://raw.githubusercontent.com/sonicwall/sonicwall-nsv-azure-templates/gen6"
     },
     "virtualNetworkNewOrExisting": {
       "type": "string",
