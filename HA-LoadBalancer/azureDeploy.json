@@ -81,14 +81,14 @@
       "type": "string",
       "defaultValue": "scx",
       "metadata": {
-        "description": "The type of SKU. Specify \"scx\" for 7.1 images, \"byol\" for 7.0 images or \"byol-654\" for 6.5 images."
+        "description": "The type of SKU. Specify \"scx\" for 7.1 images or \"byol\" for 7.0 images."
       }
     },
     "imageVersion": {
       "type": "string",
       "defaultValue": "latest",
       "metadata": {
-        "description": "The version of the loaded NSv image. Specifying \"latest\" will automatically select the latest version of the image in the corresponding \"Image Sku Type\". Or a specific version can be specified. For example \"7.0.2363\" for \"byol\" or \"6.5.2340\" for \"byol-654\". Versions available in the SKUs can be listed by running \"az vm image list --output table --all --publisher sonicwall-inc --offer sonicwall-nsz-azure\" in Azure Bash Cloud Shell."
+        "description": "The version of the loaded NSv image. Specifying \"latest\" will automatically select the latest version of the image in the corresponding \"Image Sku Type\". Or a specific version can be specified. For example \"7.0.2363\" for \"byol\". Versions available in the SKUs can be listed by running \"az vm image list --output table --all --publisher sonicwall-inc --offer sonicwall-nsz-azure\" in Azure Bash Cloud Shell."
       }
     },
     "managementAccessIPSource": {
@@ -100,16 +100,14 @@
     "nsvModel": {
       "type": "string",
       "allowedValues": [
-        "NSv 10 / NSv 25 / NSv 50 / NSv 100 (only for SKU byol-654)",
-        "NSv 270 / NSv 200",
-        "NSv 470 / NSv 400",
-        "NSv 870 / NSv 800",
-        "NSv 1600 (only for SKU byol-654)"
+        "NSv 270",
+        "NSv 470",
+        "NSv 870"
       ],
       "metadata": {
-        "description": "SonicWall-NSv model. Choosing NSv 10, 25, 50, 100, 200, 400, 800 or 1600 with SKU \"byol-654\" will use Standard_D2_v2, Standard_D3_v2, Standard_D4_v2, Standard_D5_v2 respectively. Choosing NSv 270, 470 or 870 with SKU \"byol\" will use Standard_D2_v2, Standard_D3_v2, Standard_D4_v2 respectively. Choosing NSv 270, 470 or 870 with SKU \"scx\" will use Standard_DS2_v2, Standard_DS3_v2, Standard_DS4_v2 respectively."
+        "description": "SonicWall-NSv model. Choosing NSv 270, 470 or 870 with SKU \"byol\" will use Standard_D2_v2, Standard_D3_v2, Standard_D4_v2 respectively. Choosing NSv 270, 470 or 870 with SKU \"scx\" will use Standard_DS2_v2, Standard_DS3_v2, Standard_DS4_v2 respectively."
       },
-      "defaultValue": "NSv 470 / NSv 400"
+      "defaultValue": "NSv 470"
     },
     "virtualNetworkNewOrExisting": {
       "type": "string",
@@ -268,11 +266,9 @@
       }
     },
     "vmSize": {
-      "NSv 10 / NSv 25 / NSv 50 / NSv 100 (only for SKU byol-654)": "[if(sonicwall.isLegacySku(variables('imageSku')), 'Standard_D2_v2', 'Standard_DS2_v2')]",
-      "NSv 270 / NSv 200": "[if(sonicwall.isLegacySku(variables('imageSku')), 'Standard_D2_v2', 'Standard_DS2_v2')]",
-      "NSv 470 / NSv 400": "[if(sonicwall.isLegacySku(variables('imageSku')), 'Standard_D3_v2', 'Standard_DS3_v2')]",
-      "NSv 870 / NSv 800": "[if(sonicwall.isLegacySku(variables('imageSku')), 'Standard_D4_v2', 'Standard_DS4_v2')]",
-      "NSv 1600 (only for SKU byol-654)": "[if(sonicwall.isLegacySku(variables('imageSku')), 'Standard_D5_v2', 'Standard_DS5_v2')]"
+      "NSv 270": "[if(sonicwall.isLegacySku(variables('imageSku')), 'Standard_D2_v2', 'Standard_DS2_v2')]",
+      "NSv 470": "[if(sonicwall.isLegacySku(variables('imageSku')), 'Standard_D3_v2', 'Standard_DS3_v2')]",
+      "NSv 870": "[if(sonicwall.isLegacySku(variables('imageSku')), 'Standard_D4_v2', 'Standard_DS4_v2')]"
     },
     "ilbName": "[concat(parameters('vmName'), '-ILB')]",
     "ilbID": "[resourceId('Microsoft.Network/loadBalancers',variables('ilbName'))]",
