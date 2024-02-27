@@ -5,10 +5,19 @@
     "parameters": {
         "basics": [
             {
+                "name": "vmNameInfo",
+                "type": "Microsoft.Common.InfoBox",
+                "visible": "[or(equals(basics('vmName'), ''), equals(basics('vmName'), steps('instanceDetails').vnetSpec.name), equals(basics('vmName'), steps('instanceDetails').storageSpec.name))]",
+                "options": {
+                    "icon": "Info",
+                    "text": "The VM Name should not match the Storage Account or Virtual Network resource names."
+                }
+            },
+            {
                 "name": "vmName",
                 "type": "Microsoft.Common.TextBox",
                 "label": "VM Name",
-                "toolTip": "The name of the new VM instance.",
+                "toolTip": "The name of the new VM instance. It is recommended to use a unique name within the resource group. The name should not match the name of the Storage Account or the Virtual Network resources.",
                 "constraints": {
                     "required": true,
                     "regex": "^[a-zA-Z0-9]{3,24}$",
@@ -157,6 +166,15 @@
                         "visible": "[equals(steps('instanceDetails').nsvPlan, 'snwl-nsv-scx')]"
                     },
                     {
+                        "name": "vNetInfoBox",
+                        "type": "Microsoft.Common.InfoBox",
+                        "visible": "[equals(basics('vmName'), steps('instanceDetails').vnetSpec.name)]",
+                        "options": {
+                            "icon": "Warning",
+                            "text": "The Virtual Network's name should not match the VM Name on the Basics tab."
+                        }
+                    },
+                    {
                         "name": "vnetSpec",
                         "type": "Microsoft.Network.VirtualNetworkCombo",
                         "label": {
@@ -237,6 +255,15 @@
                             "validationMessage": "Please enter a valid IPv4 address"
                         },
                         "visible": true
+                    },
+                    {
+                        "name": "storageNameInfo",
+                        "type": "Microsoft.Common.InfoBox",
+                        "visible": "[equals(basics('vmName'), steps('instanceDetails').storageSpec.name)]",
+                        "options": {
+                            "icon": "Warning",
+                            "text": "The selected Storage Account's name should not match the VM Name on the Basics tab."
+                        }
                     },
                     {
                         "name": "storageSpec",
