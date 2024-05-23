@@ -105,7 +105,7 @@
         "NSv 870"
       ],
       "metadata": {
-        "description": "SonicWall-NSv model. Choosing NSv 270, 470 or 870 with SKU \"byol\" will use Standard_D2_v2, Standard_D3_v2, Standard_D4_v2 respectively. Choosing NSv 270, 470 or 870 with SKU \"scx\" will use Standard_DS2_v2, Standard_DS3_v2, Standard_DS4_v2 respectively."
+        "description": "SonicWall-NSv model. Choosing NSv 270, 470 or 870 with SKU \"byol\" will use Standard_D3_v2, Standard_D3_v2, Standard_D4_v2 respectively. Choosing NSv 270, 470 or 870 with SKU \"scx\" will use Standard_DS3_v2, Standard_DS3_v2, Standard_DS4_v2 respectively."
       },
       "defaultValue": "NSv 470"
     },
@@ -266,7 +266,7 @@
       }
     },
     "vmSize": {
-      "NSv 270": "[if(sonicwall.isLegacySku(variables('imageSku')), 'Standard_D2_v2', 'Standard_DS2_v2')]",
+      "NSv 270": "[if(sonicwall.isLegacySku(variables('imageSku')), 'Standard_D3_v2', 'Standard_DS3_v2')]",
       "NSv 470": "[if(sonicwall.isLegacySku(variables('imageSku')), 'Standard_D3_v2', 'Standard_DS3_v2')]",
       "NSv 870": "[if(sonicwall.isLegacySku(variables('imageSku')), 'Standard_D4_v2', 'Standard_DS4_v2')]"
     },
