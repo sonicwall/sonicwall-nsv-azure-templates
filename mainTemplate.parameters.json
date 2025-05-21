@@ -45,7 +45,7 @@
       "value": "Standard_D3_v2"
     },
     "baseUrl": {
-      "value": "https://raw.githubusercontent.com/sonicwall-jma/sonicwall-nsv-azure-templates/standard_public_ip_gen6"
+      "value": "https://raw.githubusercontent.com/sonicwall/nsv-azure-templates/gen6"
     },
     "virtualNetworkName": {
       "value": "firewallVnet"
