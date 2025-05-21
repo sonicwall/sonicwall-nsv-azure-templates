@@ -80,7 +80,7 @@
     },
     "imageSku": {
       "type": "string",
-      "defaultValue": "snwl-nsv-byol",
+      "defaultValue": "snwl-nsv-byol-654",
       "metadata": {
         "description": "The name of the Azure product to load"
       }
