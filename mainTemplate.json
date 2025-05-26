@@ -80,7 +80,7 @@
     },
     "imageSku": {
       "type": "string",
-      "defaultValue": "snwl-nsv-byol",
+      "defaultValue": "snwl-nsv-byol-654",
       "metadata": {
         "description": "The name of the Azure product to load"
       }
@@ -206,7 +206,7 @@
     },
     "publicIpAllocationMethod": {
       "type": "string",
-      "defaultValue": "Dynamic",
+      "defaultValue": "Static",
       "allowedValues": [
         "Dynamic",
         "Static"
@@ -217,7 +217,7 @@
     },
     "publicIpSku": {
       "type": "string",
-      "defaultValue": "Basic",
+      "defaultValue": "Standard",
       "allowedValues": [
         "Basic",
         "Standard"

@@ -36,7 +36,7 @@
       "value": null
     },
     "imageSku": {
-      "value": "snwl-nsv-byol"
+      "value": "snwl-nsv-byol-654"
     },
     "managementAccessIPSource": {
       "value": null
@@ -78,10 +78,10 @@
       "value": "[resourceGroup().name]"
     },
     "publicIpAllocationMethod": {
-      "value": "Dynamic"
+      "value": "Static"
     },
     "publicIpSku": {
-      "value": "Basic"
+      "value": "Standard"
     }
   }
 }
