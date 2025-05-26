@@ -75,10 +75,10 @@
       "value": "[resourceGroup().name]"
     },
     "publicIpAllocationMethod": {
-      "value": "Dynamic"
+      "value": "Static"
     },
     "publicIpSku": {
-      "value": "Basic"
+      "value": "Standard"
     }
   }
 }
