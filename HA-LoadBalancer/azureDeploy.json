@@ -921,11 +921,12 @@
             },
             {
               "type": "Microsoft.Network/virtualNetworks/subnets",
-              "apiVersion": "2018-07-01",
+              "apiVersion": "2018-08-01",
               "name": "[concat(parameters('virtualNetworkName'), '/', parameters('subnetLANName'))]",
               "location": "[parameters('location')]",
               "properties": {
-                "addressPrefix": "[reference(variables('lanSubnetID'), '2018-04-01').addressPrefix]",
+                "addressPrefix": "[tryGet(reference(variables('lanSubnetID'), '2018-08-01'), 'addressPrefix')]",
+                "addressPrefixes": "[tryGet(reference(variables('lanSubnetID'), '2018-08-01'), 'addressPrefixes')]",
                 "routeTable": {
                   "id": "[resourceId('Microsoft.Network/routeTables', variables('lanRtName'))]"
                 }
