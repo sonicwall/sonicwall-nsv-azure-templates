@@ -80,7 +80,6 @@
     },
     "imageSku": {
       "type": "string",
-      "defaultValue": "snwl-nsv-scx",
       "metadata": {
         "description": "The name of the Azure product to load"
       }
@@ -98,17 +97,16 @@
         "description": "Public IP address allowed access SonicWall NSv HTTPS & SSH management "
       }
     },
-    "nsvModel": {
+    "vmSize": {
       "type": "string",
       "allowedValues": [
-        "NSv 270",
-        "NSv 470",
-        "NSv 870"
+        "Standard_DS1_v2",
+        "Standard_B1ms",
+        "Standard_DC1ds_v3",
+        "Standard_DC1s_v3",
+        "Standard_F1s"
       ],
-      "metadata": {
-        "description": "SonicWall-NSv model, NSv 270 VM size Standard_DS2_v2 or Standard_D2_v2, NSv 470 VM size Standard_DS3_v2 or Standard_D3_v2, NSv 870 VM size Standard_DS4_v2 or Standard_D4_v2, depending on the SKU selected"
-      },
-      "defaultValue": "NSv 470"
+      "defaultValue": "Standard_DS1_v2"
     },
     "virtualNetworkNewOrExisting": {
       "type": "string",
@@ -246,11 +244,6 @@
         "secureBootEnabled": false,
         "vTpmEnabled": true
       }
-    },
-    "vmSize": {
-      "NSv 270": "[if(sonicwall.isLegacySku(parameters('imageSku')), 'Standard_D2_v2', 'Standard_DS2_v2')]",
-      "NSv 470": "[if(sonicwall.isLegacySku(parameters('imageSku')), 'Standard_D3_v2', 'Standard_DS3_v2')]",
-      "NSv 870": "[if(sonicwall.isLegacySku(parameters('imageSku')), 'Standard_D4_v2', 'Standard_DS4_v2')]"
     },
     "imagePublisher": "sonicwall-inc",
     "imageOffer" : "sonicwall-nsz-azure",
@@ -539,7 +532,7 @@
       },
       "properties": {
         "hardwareProfile": {
-          "vmSize": "[variables('vmSize')[parameters('nsvModel')]]"
+          "vmSize": "[parameters('vmSize')]"
         },
         "osProfile": "[variables(concat(parameters('authenticationType'), 'OsProfile'))]",
         "securityProfile": "[if(sonicwall.isLegacySku(parameters('imageSku')), json('null'), variables('trustedLaunchSecurityProfile'))]",
