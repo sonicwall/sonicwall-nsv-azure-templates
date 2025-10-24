@@ -247,6 +247,7 @@
     },
     "imagePublisher": "sonicwall-inc",
     "imageOffer" : "sonicwall-nsz-azure",
+    "imageSkuTrimmed": "[trim(parameters('imageSku'))]",
     "imageVersionNumberPrefix": "[if(equals(indexOf(parameters('imageVersion'), '.'), -1), '0.0.', '')]",
     "imageVersionNumber": "[concat(variables('imageVersionNumberPrefix'), parameters('imageVersion'))]",
     "imageVersion": "[if(equals(parameters('imageVersion'), 'latest'), 'latest', variables('imageVersionNumber'))]",
@@ -526,7 +527,7 @@
         "[concat(variables('nicName'),'-X0')]"
       ],
       "plan": {
-        "name": "[parameters('imageSku')]",
+        "name": "[variables('imageSkuTrimmed')]",
         "product": "[variables('imageOffer')]",
         "publisher": "[variables('imagePublisher')]"
       },
@@ -535,12 +536,12 @@
           "vmSize": "[parameters('vmSize')]"
         },
         "osProfile": "[variables(concat(parameters('authenticationType'), 'OsProfile'))]",
-        "securityProfile": "[if(sonicwall.isLegacySku(parameters('imageSku')), json('null'), variables('trustedLaunchSecurityProfile'))]",
+        "securityProfile": "[if(sonicwall.isLegacySku(variables('imageSkuTrimmed')), json('null'), variables('trustedLaunchSecurityProfile'))]",
         "storageProfile": {
           "imageReference": {
             "publisher": "[variables('imagePublisher')]",
             "offer": "[variables('imageOffer')]",
-            "sku": "[parameters('imageSku')]",
+            "sku": "[variables('imageSkuTrimmed')]",
             "version": "[variables('imageVersion')]"
           },
           "osDisk": {
