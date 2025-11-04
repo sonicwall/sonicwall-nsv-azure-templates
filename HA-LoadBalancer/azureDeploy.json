@@ -112,6 +112,10 @@
     "virtualNetworkNewOrExisting": {
       "type": "string",
       "defaultValue": "new",
+      "allowedValues": [
+        "new",
+        "existing"
+      ],
       "metadata": {
         "description": "Determines whether or not a new virtual network should be provisioned."
       }
@@ -277,6 +281,7 @@
     "ilbFrontEndIPConfigID": "[concat(variables('ilbID'),'/frontendIPConfigurations/LoadBalancerFrontEnd')]",
     "vnetID": "[resourceId(parameters('virtualNetworkResourceGroupName'), 'Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",
     "lanSubnetID": "[concat(resourceId(parameters('virtualNetworkResourceGroupName'), 'Microsoft.Network/virtualNetworks', parameters('virtualNetworkName')), '/subnets/', parameters('subnetLANName'))]",
+    "wanSubnetID": "[resourceId(parameters('virtualNetworkResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('subnetWANName'))]",
     "lanRtName": "[concat(parameters('virtualNetworkName'), '-', parameters('subnetLANName'), '-RT')]"
   },
   "functions": [
@@ -603,7 +608,7 @@
             "properties": {
               "privateIPAllocationMethod": "Dynamic",
               "subnet": {
-                "id": "[resourceId(parameters('virtualNetworkResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets/', parameters('virtualNetworkName'), parameters('subnetWANName'))]"
+                "id": "[variables('wanSubnetID')]"
               },
               "loadBalancerBackendAddressPools": [
                 {
@@ -667,7 +672,7 @@
             "properties": {
               "privateIPAllocationMethod": "Dynamic",
               "subnet": {
-                "id": "[resourceId(parameters('virtualNetworkResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets/', parameters('virtualNetworkName'), parameters('subnetWANName'))]"
+                "id": "[variables('wanSubnetID')]"
               },
               "loadBalancerBackendAddressPools": [
                 {
@@ -929,6 +934,41 @@
                 "addressPrefixes": "[tryGet(reference(variables('lanSubnetID'), '2018-08-01'), 'addressPrefixes')]",
                 "routeTable": {
                   "id": "[resourceId('Microsoft.Network/routeTables', variables('lanRtName'))]"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "condition": "[equals(parameters('virtualNetworkNewOrExisting'), 'existing')]",
+      "comments": "Only associate the new NSG when virtualNetworkNewOrExisting is existing and the existing WAN subnet does not have an NSG associated.",
+      "apiVersion": "2017-05-10",
+      "type": "Microsoft.Resources/deployments",
+      "name": "updateWanSubnetNsg",
+      "resourceGroup": "[parameters('virtualNetworkResourceGroupName')]",
+      "dependsOn": [
+        "[resourceId(resourceGroup().name, 'Microsoft.Network/networkSecurityGroups', variables('nsgname-mgmt'))]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "parameters": {},
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": {},
+          "variables": {},
+          "resources": [
+            {
+              "type": "Microsoft.Network/virtualNetworks/subnets",
+              "apiVersion": "2018-08-01",
+              "name": "[concat(parameters('virtualNetworkName'), '/', parameters('subnetWANName'))]",
+              "properties": {
+                "addressPrefix": "[tryGet(reference(variables('wanSubnetID'), '2018-08-01'), 'addressPrefix')]",
+                "addressPrefixes": "[tryGet(reference(variables('wanSubnetID'), '2018-08-01'), 'addressPrefixes')]",
+                "networkSecurityGroup": {
+                  "id": "[if(contains(reference(variables('wanSubnetID'), '2018-08-01'), 'networkSecurityGroup'), reference(variables('wanSubnetID'), '2018-08-01').networkSecurityGroup.id, resourceId(resourceGroup().name, 'Microsoft.Network/networkSecurityGroups', variables('nsgname-mgmt')))]"
                 }
               }
             }
