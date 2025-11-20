@@ -185,7 +185,7 @@
     },
     "publicIpDns": {
       "type": "string",
-      "defaultValue": "[concat('sonicwall-nsv-', uniqueString(resourceGroup().id))]",
+      "defaultValue": "[concat('sonicwall-nsv-', uniqueString(resourceGroup().id, parameters('publicIpName')))]",
       "metadata": {
         "description": "DNS of the public ip address for the VM"
       }
