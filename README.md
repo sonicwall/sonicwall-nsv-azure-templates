@@ -20,6 +20,12 @@ Press the "Deploy to Azure" button to load the ARM template into your Azure subs
 
 [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fsonicwall%2Fsonicwall-nsv-azure-templates%2Fmaster%2FmainTemplate.json)
 
+
+This button deploys the mainTemplate with the UI definition file. The UI definition file is used to create a custom deployment experience in the Azure portal. The UI definition file is not required to deploy the template.
+
+[![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fsonicwall%2Fsonicwall-nsv-azure-templates%2Fmaster%2FmainTemplate.json/createUIDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2Fsonicwall%2Fsonicwall-nsv-azure-templates%2Fmaster%2FcreateUiDefinition.json)
+
+
 To find out more about ARM templates refer to https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-template-deploy#deploy-with-azure-cli
 
 ***
