@@ -226,7 +226,7 @@
   },
   "variables": {
     "imagePublisher": "sonicwall-inc",
-    "imageSku": "[concat('snwl-nsv-',parameters('imageSkuType'))]",
+    "imageSku": "[concat('snwl-nsv-',trim(parameters('imageSkuType')))]",
     "imageOffer": "sonicwall-nsz-azure",
     "imageVersionNumberPrefix": "[if(equals(indexOf(parameters('imageVersion'), '.'), -1), '0.0.', '')]",
     "imageVersionNumber": "[concat(variables('imageVersionNumberPrefix'), parameters('imageVersion'))]",
