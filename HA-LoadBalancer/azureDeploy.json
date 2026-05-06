@@ -81,7 +81,7 @@
       "type": "string",
       "defaultValue": "scx",
       "metadata": {
-        "description": "The type of SKU. Specify \"scx\" for 7.1 images or \"byol\" for 7.0 images."
+        "description": "The type of SKU. Specify \"scx\" for 7.1 images, \"byol\" for 7.0 images or \"scx-gen8\" for 8.2 images."
       }
     },
     "imageVersion": {
@@ -102,7 +102,8 @@
       "allowedValues": [
         "NSv 270",
         "NSv 470",
-        "NSv 870"
+        "NSv 870",
+        "NSv XS"
       ],
       "metadata": {
         "description": "SonicWall-NSv model. Choosing NSv 270, 470 or 870 with SKU \"byol\" will use Standard_D3_v2, Standard_D3_v2, Standard_D4_v2 respectively. Choosing NSv 270, 470 or 870 with SKU \"scx\" will use Standard_DS3_v2, Standard_DS3_v2, Standard_DS4_v2 respectively."
@@ -272,7 +273,8 @@
     "vmSize": {
       "NSv 270": "[if(sonicwall.isLegacySku(variables('imageSku')), 'Standard_D3_v2', 'Standard_DS3_v2')]",
       "NSv 470": "[if(sonicwall.isLegacySku(variables('imageSku')), 'Standard_D3_v2', 'Standard_DS3_v2')]",
-      "NSv 870": "[if(sonicwall.isLegacySku(variables('imageSku')), 'Standard_D4_v2', 'Standard_DS4_v2')]"
+      "NSv 870": "[if(sonicwall.isLegacySku(variables('imageSku')), 'Standard_D4_v2', 'Standard_DS4_v2')]",
+      "NSv XS": "Standard_DS1_v2"
     },
     "ilbName": "[concat(parameters('vmName'), '-ILB')]",
     "ilbID": "[resourceId('Microsoft.Network/loadBalancers',variables('ilbName'))]",
