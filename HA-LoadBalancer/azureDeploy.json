@@ -96,16 +96,17 @@
         "description": "Public IP address allowed access SonicWall NSv HTTPS & SSH management "
       }
     },
-    "vmSize": {
+    "nsvModel": {
       "type": "string",
       "allowedValues": [
-        "Standard_DS1_v2",
-        "Standard_B1ms",
-        "Standard_DC1ds_v3",
-        "Standard_DC1s_v3",
-        "Standard_F1s"
+        "NSv 270",
+        "NSv 470",
+        "NSv 870"
       ],
-      "defaultValue": "Standard_DS1_v2"
+      "metadata": {
+        "description": "SonicWall-NSv model. Choosing NSv 270, 470 or 870 with SKU \"byol\" will use Standard_D3_v2, Standard_D3_v2, Standard_D4_v2 respectively. Choosing NSv 270, 470 or 870 with SKU \"scx\" will use Standard_DS3_v2, Standard_DS3_v2, Standard_DS4_v2 respectively."
+      },
+      "defaultValue": "NSv 470"
     },
     "virtualNetworkNewOrExisting": {
       "type": "string",
@@ -266,6 +267,11 @@
         "secureBootEnabled": false,
         "vTpmEnabled": true
       }
+    },
+    "vmSize": {
+      "NSv 270": "[if(sonicwall.isLegacySku(variables('imageSku')), 'Standard_D3_v2', 'Standard_DS3_v2')]",
+      "NSv 470": "[if(sonicwall.isLegacySku(variables('imageSku')), 'Standard_D3_v2', 'Standard_DS3_v2')]",
+      "NSv 870": "[if(sonicwall.isLegacySku(variables('imageSku')), 'Standard_D4_v2', 'Standard_DS4_v2')]"
     },
     "ilbName": "[concat(parameters('vmName'), '-ILB')]",
     "ilbID": "[resourceId('Microsoft.Network/loadBalancers',variables('ilbName'))]",
@@ -733,7 +739,7 @@
           "id": "[resourceId('Microsoft.Compute/availabilitySets', variables('availabilitySetName'))]"
         },
         "hardwareProfile": {
-          "vmSize": "[parameters('vmSize')]"
+          "vmSize": "[variables('vmSize')[parameters('nsvModel')]]"
         },
         "osProfile": {
           "computerName": "[format(variables('vmNameFmt'), parameters('vmName'), copyIndex('VmLoop', 1))]",
