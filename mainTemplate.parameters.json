@@ -35,19 +35,20 @@
     "sshKey": {
       "value": null
     },
+    "imageSku": {
+      "value": "snwl-nsv-scx"
+    },
     "managementAccessIPSource": {
       "value": null
     },
-    "vmSize": {
-      "value": "Standard_DS1_v2"
+    "nsvModel": {
+      "value": "NSv 470"
     },
     "virtualNetworkName": {
       "value": "firewallVnet"
     },
     "virtualNetworkAddressPrefix": {
-      "value": [
-        "192.168.0.0/16"
-      ]
+      "value": "192.168.0.0/16"
     },
     "subnetWANName": {
       "value": "WAN-X1"
