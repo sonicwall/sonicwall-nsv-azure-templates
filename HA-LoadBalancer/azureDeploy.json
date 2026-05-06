@@ -79,15 +79,16 @@
     },
     "imageSkuType": {
       "type": "string",
+      "defaultValue": "scx",
       "metadata": {
-        "description": "The type of SKU."
+        "description": "The type of SKU. Specify \"scx\" for 7.1 images or \"byol\" for 7.0 images."
       }
     },
     "imageVersion": {
       "type": "string",
       "defaultValue": "latest",
       "metadata": {
-        "description": "The version of the loaded NSv image. Specifying \"latest\" will automatically select the latest version of the image in the corresponding \"Image Sku Type\". Or a specific version can be specified. Versions available in the SKUs can be listed by running \"az vm image list --output table --all --publisher sonicwall-inc --offer sonicwall-nsz-azure\" in Azure Bash Cloud Shell."
+        "description": "The version of the loaded NSv image. Specifying \"latest\" will automatically select the latest version of the image in the corresponding \"Image Sku Type\". Or a specific version can be specified. For example \"7.0.2363\" for \"byol\". Versions available in the SKUs can be listed by running \"az vm image list --output table --all --publisher sonicwall-inc --offer sonicwall-nsz-azure\" in Azure Bash Cloud Shell."
       }
     },
     "managementAccessIPSource": {
