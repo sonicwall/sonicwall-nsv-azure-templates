@@ -103,7 +103,8 @@
       "allowedValues": [
         "NSv 270",
         "NSv 470",
-        "NSv 870"
+        "NSv 870",
+        "NSv XS"
       ],
       "metadata": {
         "description": "SonicWall-NSv model, NSv 270 VM size Standard_DS2_v2 or Standard_D2_v2, NSv 470 VM size Standard_D4s_v4 or Standard_D3_v2, NSv 870 VM size Standard_DS4_v2 or Standard_D4_v2, depending on the SKU selected"
@@ -113,6 +114,10 @@
     "virtualNetworkNewOrExisting": {
       "type": "string",
       "defaultValue": "new",
+      "allowedValues": [
+        "new",
+        "existing"
+      ],
       "metadata": {
         "description": "Determines whether or not a new virtual network should be provisioned."
       }
@@ -250,10 +255,12 @@
     "vmSize": {
       "NSv 270": "[if(sonicwall.isLegacySku(parameters('imageSku')), 'Standard_D2_v2', 'Standard_DS2_v2')]",
       "NSv 470": "[if(sonicwall.isLegacySku(parameters('imageSku')), 'Standard_D3_v2', 'Standard_D4s_v4')]",
-      "NSv 870": "[if(sonicwall.isLegacySku(parameters('imageSku')), 'Standard_D4_v2', 'Standard_DS4_v2')]"
+      "NSv 870": "[if(sonicwall.isLegacySku(parameters('imageSku')), 'Standard_D4_v2', 'Standard_DS4_v2')]",
+      "NSv XS": "Standard_DS1_v2"
     },
     "imagePublisher": "sonicwall-inc",
     "imageOffer" : "sonicwall-nsz-azure",
+    "imageSkuTrimmed": "[trim(parameters('imageSku'))]",
     "imageVersionNumberPrefix": "[if(equals(indexOf(parameters('imageVersion'), '.'), -1), '0.0.', '')]",
     "imageVersionNumber": "[concat(variables('imageVersionNumberPrefix'), parameters('imageVersion'))]",
     "imageVersion": "[if(equals(parameters('imageVersion'), 'latest'), 'latest', variables('imageVersionNumber'))]",
@@ -533,7 +540,7 @@
         "[concat(variables('nicName'),'-X0')]"
       ],
       "plan": {
-        "name": "[parameters('imageSku')]",
+        "name": "[variables('imageSkuTrimmed')]",
         "product": "[variables('imageOffer')]",
         "publisher": "[variables('imagePublisher')]"
       },
@@ -542,12 +549,12 @@
           "vmSize": "[variables('vmSize')[parameters('nsvModel')]]"
         },
         "osProfile": "[variables(concat(parameters('authenticationType'), 'OsProfile'))]",
-        "securityProfile": "[if(sonicwall.isLegacySku(parameters('imageSku')), json('null'), variables('trustedLaunchSecurityProfile'))]",
+        "securityProfile": "[if(sonicwall.isLegacySku(variables('imageSkuTrimmed')), json('null'), variables('trustedLaunchSecurityProfile'))]",
         "storageProfile": {
           "imageReference": {
             "publisher": "[variables('imagePublisher')]",
             "offer": "[variables('imageOffer')]",
-            "sku": "[parameters('imageSku')]",
+            "sku": "[variables('imageSkuTrimmed')]",
             "version": "[variables('imageVersion')]"
           },
           "osDisk": {
