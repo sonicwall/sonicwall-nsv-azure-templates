@@ -44,6 +44,9 @@
     "nsvModel": {
       "value": "NSv 470"
     },
+    "vmSize": {
+      "value": ""
+    },
     "virtualNetworkName": {
       "value": "firewallVnet"
     },
