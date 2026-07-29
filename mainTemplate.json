@@ -104,12 +104,41 @@
         "NSv 270",
         "NSv 470",
         "NSv 870",
-        "NSv XS"
+        "NSv XS",
+        "NSv S",
+        "NSv M",
+        "NSv L"
       ],
       "metadata": {
-        "description": "SonicWall-NSv model, NSv 270 VM size Standard_DS2_v2 or Standard_D2_v2, NSv 470 VM size Standard_D4s_v4 or Standard_D3_v2, NSv 870 VM size Standard_DS4_v2 or Standard_D4_v2, depending on the SKU selected"
+        "description": "SonicWall-NSv model. Each model deploys a recommended Azure VM size; NSv 270, NSv 470 and NSv 870 select their size depending on the SKU selected. To deploy NSv XS, NSv S, NSv M or NSv L on a different certified size, set the vmSize parameter."
       },
       "defaultValue": "NSv 470"
+    },
+    "vmSize": {
+      "type": "string",
+      "allowedValues": [
+        "",
+        "Standard_DS1_v2",
+        "Standard_B1ms",
+        "Standard_DC1ds_v3",
+        "Standard_DC1s_v3",
+        "Standard_F1s",
+        "Standard_DS12-1_v2",
+        "Standard_D2d_v4",
+        "Standard_D2ds_v4",
+        "Standard_D2s_v4",
+        "Standard_D4_v4",
+        "Standard_D4s_v4",
+        "Standard_D4d_v4",
+        "Standard_D4ds_v4",
+        "Standard_D8_v4",
+        "Standard_D8_v3",
+        "Standard_D8s_v3"
+      ],
+      "metadata": {
+        "description": "Azure VM size to deploy. Leave empty to use the recommended size for the selected NSv model. Applies to NSv XS, NSv S, NSv M and NSv L only; it is ignored for NSv 270, NSv 470 and NSv 870, whose sizes are determined by the SKU selected. When set, the size must be one certified for the selected model: NSv XS - Standard_DS1_v2, Standard_B1ms, Standard_DC1ds_v3, Standard_DC1s_v3, Standard_F1s, Standard_DS12-1_v2; NSv S - Standard_D2d_v4, Standard_D2ds_v4, Standard_D2s_v4; NSv M - Standard_D4_v4, Standard_D4s_v4, Standard_D4d_v4, Standard_D4ds_v4; NSv L - Standard_D8_v4, Standard_D8_v3, Standard_D8s_v3."
+      },
+      "defaultValue": ""
     },
     "virtualNetworkNewOrExisting": {
       "type": "string",
@@ -256,7 +285,10 @@
       "NSv 270": "[if(sonicwall.isLegacySku(parameters('imageSku')), 'Standard_D2_v2', 'Standard_DS2_v2')]",
       "NSv 470": "[if(sonicwall.isLegacySku(parameters('imageSku')), 'Standard_D3_v2', 'Standard_D4s_v4')]",
       "NSv 870": "[if(sonicwall.isLegacySku(parameters('imageSku')), 'Standard_D4_v2', 'Standard_DS4_v2')]",
-      "NSv XS": "Standard_DS1_v2"
+      "NSv XS": "[if(empty(parameters('vmSize')), 'Standard_DS1_v2', parameters('vmSize'))]",
+      "NSv S": "[if(empty(parameters('vmSize')), 'Standard_D2ds_v4', parameters('vmSize'))]",
+      "NSv M": "[if(empty(parameters('vmSize')), 'Standard_D4s_v4', parameters('vmSize'))]",
+      "NSv L": "[if(empty(parameters('vmSize')), 'Standard_D8_v4', parameters('vmSize'))]"
     },
     "imagePublisher": "sonicwall-inc",
     "imageOffer" : "sonicwall-nsz-azure",
