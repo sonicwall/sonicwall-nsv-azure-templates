@@ -86,42 +86,52 @@
     },
     "imageSku": {
       "type": "string",
-      "allowedValues": [
-        "snwl-nsv-byol",
-        "snwl-nsv-scx"
-      ],
-      "defaultValue": "snwl-nsv-scx"
+      "defaultValue": "snwl-nsv-scx",
+      "metadata": {
+        "description": "The name of the Azure product to load. Specify \"snwl-nsv-scx\" for gen7 NSv 7.1 or newer images, \"snwl-nsv-byol\" for gen7 NSv 7.0 images, or \"snwl-nsv-scx-gen8\" for gen8 images. The SKU must match the selected nsvModel: NSv 270, NSv 470 and NSv 870 require a gen7 SKU; NSv XS, NSv S, NSv M and NSv L require the gen8 SKU. A mismatched combination fails template validation."
+      }
     },
-    "vmSizeSc": {
+    "nsvModel": {
       "type": "string",
       "allowedValues": [
-        "Standard_D2_v2",
-        "Standard_D3_v2",
-        "Standard_D4_v2",
-        "Standard_D5_v2",
-        "Standard_B2ms",
-        "Standard_B4ms",
-        "Standard_D2ds_v4",
-        "Standard_D2s_v4",
-        "Standard_D2_v4",
-        "Standard_DS3_v2"
+        "NSv 270",
+        "NSv 470",
+        "NSv 870",
+        "NSv XS",
+        "NSv S",
+        "NSv M",
+        "NSv L"
       ],
-      "defaultValue": "Standard_D3_v2"
+      "metadata": {
+        "description": "SonicWall-NSv model. Each model deploys a recommended Azure VM size. NSv 270, NSv 470 and NSv 870 are gen7 models and require a gen7 imageSku (\"snwl-nsv-scx\" or \"snwl-nsv-byol\"); their size depends on which of the two is selected. NSv XS, NSv S, NSv M and NSv L are gen8 models and require the gen8 imageSku (\"snwl-nsv-scx-gen8\"); to deploy one of them on a different certified size, set the vmSize parameter. Pairing a model with the wrong SKU generation fails template validation."
+      },
+      "defaultValue": "NSv 470"
     },
-    "vmSizeScx": {
+    "vmSize": {
       "type": "string",
       "allowedValues": [
-        "Standard_DS2_v2",
-        "Standard_DS3_v2",
-        "Standard_DS4_v2",
-        "Standard_DS5_v2",
-        "Standard_B2ms",
-        "Standard_B4ms",
+        "",
+        "Standard_DS1_v2",
+        "Standard_B1ms",
+        "Standard_DC1ds_v3",
+        "Standard_DC1s_v3",
+        "Standard_F1s",
+        "Standard_DS12-1_v2",
+        "Standard_D2d_v4",
         "Standard_D2ds_v4",
         "Standard_D2s_v4",
-        "Standard_D2_v4"
+        "Standard_D4_v4",
+        "Standard_D4s_v4",
+        "Standard_D4d_v4",
+        "Standard_D4ds_v4",
+        "Standard_D8_v4",
+        "Standard_D8_v3",
+        "Standard_D8s_v3"
       ],
-      "defaultValue": "Standard_DS3_v2"
+      "metadata": {
+        "description": "Azure VM size to deploy. Leave empty to use the recommended size for the selected NSv model. Applies to the gen8 models NSv XS, NSv S, NSv M and NSv L only; it is ignored for NSv 270, NSv 470 and NSv 870, whose sizes are determined by the gen7 SKU selected. When set, the size must be one certified for the selected model: NSv XS - Standard_DS1_v2, Standard_B1ms, Standard_DC1ds_v3, Standard_DC1s_v3, Standard_F1s, Standard_DS12-1_v2; NSv S - Standard_D2d_v4, Standard_D2ds_v4, Standard_D2s_v4; NSv M - Standard_D4_v4, Standard_D4s_v4, Standard_D4d_v4, Standard_D4ds_v4; NSv L - Standard_D8_v4, Standard_D8_v3, Standard_D8s_v3."
+      },
+      "defaultValue": ""
     },
     "virtualNetworkNewOrExisting": {
       "type": "string",
@@ -211,24 +221,22 @@
     },
     "publicIpAllocationMethod": {
       "type": "string",
-      "defaultValue": "Dynamic",
+      "defaultValue": "Static",
       "allowedValues": [
-        "Dynamic",
         "Static"
       ],
       "metadata": {
-        "description": "Allocation method for the public ip address"
+        "description": "Allocation method for the public ip address. Standard SKU public IP addresses support static allocation only."
       }
     },
     "publicIpSku": {
       "type": "string",
-      "defaultValue": "Basic",
+      "defaultValue": "Standard",
       "allowedValues": [
-        "Basic",
         "Standard"
       ],
       "metadata": {
-        "description": "Name of the resource group for the public ip address"
+        "description": "SKU of the public ip address. Basic SKU public IP addresses were retired on 30 September 2025 and can no longer be created."
       }
     }
   },
@@ -276,10 +284,39 @@
     "publicIpAddressId": {
       "id": "[resourceId(parameters('publicIpResourceGroupName'), 'Microsoft.Network/publicIPAddresses', parameters('publicIpName'))]"
     },
-    "mapSkuToVmSize": {
-      "snwl-nsv-byol": "[parameters('vmSizeSc')]",
-      "snwl-nsv-scx": "[parameters('vmSizeScx')]"
-    }
+    "vmSizeByModelAndGeneration": {
+      "supported: NSv 270 on gen7-byol": "Standard_D2_v2",
+      "supported: NSv 270 on gen7-scx": "Standard_DS2_v2",
+      "supported: NSv 470 on gen7-byol": "Standard_D3_v2",
+      "supported: NSv 470 on gen7-scx": "Standard_D4s_v4",
+      "supported: NSv 870 on gen7-byol": "Standard_D4_v2",
+      "supported: NSv 870 on gen7-scx": "Standard_DS4_v2",
+      "supported: NSv XS on gen8": "[if(or(empty(parameters('vmSize')), not(equals(parameters('nsvModel'), 'NSv XS'))), 'Standard_DS1_v2', variables('certifiedVmSizes')[concat('certified: ', parameters('nsvModel'), ' with ', parameters('vmSize'))])]",
+      "supported: NSv S on gen8": "[if(or(empty(parameters('vmSize')), not(equals(parameters('nsvModel'), 'NSv S'))), 'Standard_D2ds_v4', variables('certifiedVmSizes')[concat('certified: ', parameters('nsvModel'), ' with ', parameters('vmSize'))])]",
+      "supported: NSv M on gen8": "[if(or(empty(parameters('vmSize')), not(equals(parameters('nsvModel'), 'NSv M'))), 'Standard_D4s_v4', variables('certifiedVmSizes')[concat('certified: ', parameters('nsvModel'), ' with ', parameters('vmSize'))])]",
+      "supported: NSv L on gen8": "[if(or(empty(parameters('vmSize')), not(equals(parameters('nsvModel'), 'NSv L'))), 'Standard_D8_v4', variables('certifiedVmSizes')[concat('certified: ', parameters('nsvModel'), ' with ', parameters('vmSize'))])]"
+    },
+    "certifiedVmSizes": {
+      "certified: NSv XS with Standard_DS1_v2": "Standard_DS1_v2",
+      "certified: NSv XS with Standard_B1ms": "Standard_B1ms",
+      "certified: NSv XS with Standard_DC1ds_v3": "Standard_DC1ds_v3",
+      "certified: NSv XS with Standard_DC1s_v3": "Standard_DC1s_v3",
+      "certified: NSv XS with Standard_F1s": "Standard_F1s",
+      "certified: NSv XS with Standard_DS12-1_v2": "Standard_DS12-1_v2",
+      "certified: NSv S with Standard_D2d_v4": "Standard_D2d_v4",
+      "certified: NSv S with Standard_D2ds_v4": "Standard_D2ds_v4",
+      "certified: NSv S with Standard_D2s_v4": "Standard_D2s_v4",
+      "certified: NSv M with Standard_D4_v4": "Standard_D4_v4",
+      "certified: NSv M with Standard_D4s_v4": "Standard_D4s_v4",
+      "certified: NSv M with Standard_D4d_v4": "Standard_D4d_v4",
+      "certified: NSv M with Standard_D4ds_v4": "Standard_D4ds_v4",
+      "certified: NSv L with Standard_D8_v4": "Standard_D8_v4",
+      "certified: NSv L with Standard_D8_v3": "Standard_D8_v3",
+      "certified: NSv L with Standard_D8s_v3": "Standard_D8s_v3"
+    },
+    "imageSkuTrimmed": "[trim(parameters('imageSku'))]",
+    "skuGeneration": "[if(sonicwall.isLegacySku(variables('imageSkuTrimmed')), 'gen7-byol', if(contains(toLower(variables('imageSkuTrimmed')), 'gen8'), 'gen8', 'gen7-scx'))]",
+    "resolvedVmSize": "[variables('vmSizeByModelAndGeneration')[concat('supported: ', parameters('nsvModel'), ' on ', variables('skuGeneration'))]]"
   },
   "functions": [
     {
@@ -564,21 +601,21 @@
         "[variables('nicX0ResId')]"
       ],
       "plan": {
-        "name": "[parameters('imageSku')]",
+        "name": "[variables('imageSkuTrimmed')]",
         "product": "[variables('imageOffer')]",
         "publisher": "[variables('imagePublisher')]"
       },
       "properties": {
         "hardwareProfile": {
-          "vmSize": "[variables('mapSkuToVmSize')[parameters('imageSku')]]"
+          "vmSize": "[variables('resolvedVmSize')]"
         },
         "osProfile": "[variables('mapAuthTypeToOsProfile')[parameters('authenticationType')]]",
-        "securityProfile": "[if(sonicwall.isLegacySku(parameters('imageSku')), json('null'), variables('trustedLaunchSecurityProfile'))]",
+        "securityProfile": "[if(equals(variables('skuGeneration'), 'gen7-byol'), json('null'), variables('trustedLaunchSecurityProfile'))]",
         "storageProfile": {
           "imageReference": {
             "publisher": "[variables('imagePublisher')]",
             "offer": "[variables('imageOffer')]",
-            "sku": "[parameters('imageSku')]",
+            "sku": "[variables('imageSkuTrimmed')]",
             "version": "[variables('imageVersion')]"
           },
           "osDisk": {

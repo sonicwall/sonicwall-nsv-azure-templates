@@ -234,22 +234,20 @@
       "type": "string",
       "defaultValue": "Static",
       "allowedValues": [
-        "Dynamic",
         "Static"
       ],
       "metadata": {
-        "description": "Allocation method for the public ip address"
+        "description": "Allocation method for the public ip address. Standard SKU public IP addresses support static allocation only."
       }
     },
     "publicIpSku": {
       "type": "string",
       "defaultValue": "Standard",
       "allowedValues": [
-        "Basic",
         "Standard"
       ],
       "metadata": {
-        "description": "Name of the resource group for the public ip address"
+        "description": "SKU of the public ip address. Basic SKU public IP addresses were retired on 30 September 2025 and can no longer be created."
       }
     }
   },
@@ -288,10 +286,10 @@
       "supported: NSv 470 on gen7-scx": "Standard_D4s_v4",
       "supported: NSv 870 on gen7-byol": "Standard_D4_v2",
       "supported: NSv 870 on gen7-scx": "Standard_DS4_v2",
-      "supported: NSv XS on gen8": "[if(empty(parameters('vmSize')), 'Standard_DS1_v2', variables('certifiedVmSize'))]",
-      "supported: NSv S on gen8": "[if(empty(parameters('vmSize')), 'Standard_D2ds_v4', variables('certifiedVmSize'))]",
-      "supported: NSv M on gen8": "[if(empty(parameters('vmSize')), 'Standard_D4s_v4', variables('certifiedVmSize'))]",
-      "supported: NSv L on gen8": "[if(empty(parameters('vmSize')), 'Standard_D8_v4', variables('certifiedVmSize'))]"
+      "supported: NSv XS on gen8": "[if(or(empty(parameters('vmSize')), not(equals(parameters('nsvModel'), 'NSv XS'))), 'Standard_DS1_v2', variables('certifiedVmSizes')[concat('certified: ', parameters('nsvModel'), ' with ', parameters('vmSize'))])]",
+      "supported: NSv S on gen8": "[if(or(empty(parameters('vmSize')), not(equals(parameters('nsvModel'), 'NSv S'))), 'Standard_D2ds_v4', variables('certifiedVmSizes')[concat('certified: ', parameters('nsvModel'), ' with ', parameters('vmSize'))])]",
+      "supported: NSv M on gen8": "[if(or(empty(parameters('vmSize')), not(equals(parameters('nsvModel'), 'NSv M'))), 'Standard_D4s_v4', variables('certifiedVmSizes')[concat('certified: ', parameters('nsvModel'), ' with ', parameters('vmSize'))])]",
+      "supported: NSv L on gen8": "[if(or(empty(parameters('vmSize')), not(equals(parameters('nsvModel'), 'NSv L'))), 'Standard_D8_v4', variables('certifiedVmSizes')[concat('certified: ', parameters('nsvModel'), ' with ', parameters('vmSize'))])]"
     },
     "certifiedVmSizes": {
       "certified: NSv XS with Standard_DS1_v2": "Standard_DS1_v2",
@@ -311,11 +309,11 @@
       "certified: NSv L with Standard_D8_v3": "Standard_D8_v3",
       "certified: NSv L with Standard_D8s_v3": "Standard_D8s_v3"
     },
-    "certifiedVmSize": "[variables('certifiedVmSizes')[concat('certified: ', parameters('nsvModel'), ' with ', parameters('vmSize'))]]",
     "imagePublisher": "sonicwall-inc",
     "imageOffer" : "sonicwall-nsz-azure",
     "imageSkuTrimmed": "[trim(parameters('imageSku'))]",
     "skuGeneration": "[if(sonicwall.isLegacySku(variables('imageSkuTrimmed')), 'gen7-byol', if(contains(toLower(variables('imageSkuTrimmed')), 'gen8'), 'gen8', 'gen7-scx'))]",
+    "resolvedVmSize": "[variables('vmSizeByModelAndGeneration')[concat('supported: ', parameters('nsvModel'), ' on ', variables('skuGeneration'))]]",
     "imageVersionNumberPrefix": "[if(equals(indexOf(parameters('imageVersion'), '.'), -1), '0.0.', '')]",
     "imageVersionNumber": "[concat(variables('imageVersionNumberPrefix'), parameters('imageVersion'))]",
     "imageVersion": "[if(equals(parameters('imageVersion'), 'latest'), 'latest', variables('imageVersionNumber'))]",
@@ -601,7 +599,7 @@
       },
       "properties": {
         "hardwareProfile": {
-          "vmSize": "[variables('vmSizeByModelAndGeneration')[concat('supported: ', parameters('nsvModel'), ' on ', variables('skuGeneration'))]]"
+          "vmSize": "[variables('resolvedVmSize')]"
         },
         "osProfile": "[variables(concat(parameters('authenticationType'), 'OsProfile'))]",
         "securityProfile": "[if(equals(variables('skuGeneration'), 'gen7-byol'), json('null'), variables('trustedLaunchSecurityProfile'))]",
