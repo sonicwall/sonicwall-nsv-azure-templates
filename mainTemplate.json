@@ -282,17 +282,36 @@
       }
     },
     "vmSizeByModelAndGeneration": {
-      "NSv 270|gen7-byol": "Standard_D2_v2",
-      "NSv 270|gen7-scx": "Standard_DS2_v2",
-      "NSv 470|gen7-byol": "Standard_D3_v2",
-      "NSv 470|gen7-scx": "Standard_D4s_v4",
-      "NSv 870|gen7-byol": "Standard_D4_v2",
-      "NSv 870|gen7-scx": "Standard_DS4_v2",
-      "NSv XS|gen8": "[if(empty(parameters('vmSize')), 'Standard_DS1_v2', parameters('vmSize'))]",
-      "NSv S|gen8": "[if(empty(parameters('vmSize')), 'Standard_D2ds_v4', parameters('vmSize'))]",
-      "NSv M|gen8": "[if(empty(parameters('vmSize')), 'Standard_D4s_v4', parameters('vmSize'))]",
-      "NSv L|gen8": "[if(empty(parameters('vmSize')), 'Standard_D8_v4', parameters('vmSize'))]"
+      "supported: NSv 270 on gen7-byol": "Standard_D2_v2",
+      "supported: NSv 270 on gen7-scx": "Standard_DS2_v2",
+      "supported: NSv 470 on gen7-byol": "Standard_D3_v2",
+      "supported: NSv 470 on gen7-scx": "Standard_D4s_v4",
+      "supported: NSv 870 on gen7-byol": "Standard_D4_v2",
+      "supported: NSv 870 on gen7-scx": "Standard_DS4_v2",
+      "supported: NSv XS on gen8": "[if(empty(parameters('vmSize')), 'Standard_DS1_v2', variables('certifiedVmSize'))]",
+      "supported: NSv S on gen8": "[if(empty(parameters('vmSize')), 'Standard_D2ds_v4', variables('certifiedVmSize'))]",
+      "supported: NSv M on gen8": "[if(empty(parameters('vmSize')), 'Standard_D4s_v4', variables('certifiedVmSize'))]",
+      "supported: NSv L on gen8": "[if(empty(parameters('vmSize')), 'Standard_D8_v4', variables('certifiedVmSize'))]"
     },
+    "certifiedVmSizes": {
+      "certified: NSv XS with Standard_DS1_v2": "Standard_DS1_v2",
+      "certified: NSv XS with Standard_B1ms": "Standard_B1ms",
+      "certified: NSv XS with Standard_DC1ds_v3": "Standard_DC1ds_v3",
+      "certified: NSv XS with Standard_DC1s_v3": "Standard_DC1s_v3",
+      "certified: NSv XS with Standard_F1s": "Standard_F1s",
+      "certified: NSv XS with Standard_DS12-1_v2": "Standard_DS12-1_v2",
+      "certified: NSv S with Standard_D2d_v4": "Standard_D2d_v4",
+      "certified: NSv S with Standard_D2ds_v4": "Standard_D2ds_v4",
+      "certified: NSv S with Standard_D2s_v4": "Standard_D2s_v4",
+      "certified: NSv M with Standard_D4_v4": "Standard_D4_v4",
+      "certified: NSv M with Standard_D4s_v4": "Standard_D4s_v4",
+      "certified: NSv M with Standard_D4d_v4": "Standard_D4d_v4",
+      "certified: NSv M with Standard_D4ds_v4": "Standard_D4ds_v4",
+      "certified: NSv L with Standard_D8_v4": "Standard_D8_v4",
+      "certified: NSv L with Standard_D8_v3": "Standard_D8_v3",
+      "certified: NSv L with Standard_D8s_v3": "Standard_D8s_v3"
+    },
+    "certifiedVmSize": "[variables('certifiedVmSizes')[concat('certified: ', parameters('nsvModel'), ' with ', parameters('vmSize'))]]",
     "imagePublisher": "sonicwall-inc",
     "imageOffer" : "sonicwall-nsz-azure",
     "imageSkuTrimmed": "[trim(parameters('imageSku'))]",
@@ -582,7 +601,7 @@
       },
       "properties": {
         "hardwareProfile": {
-          "vmSize": "[variables('vmSizeByModelAndGeneration')[concat(parameters('nsvModel'), '|', variables('skuGeneration'))]]"
+          "vmSize": "[variables('vmSizeByModelAndGeneration')[concat('supported: ', parameters('nsvModel'), ' on ', variables('skuGeneration'))]]"
         },
         "osProfile": "[variables(concat(parameters('authenticationType'), 'OsProfile'))]",
         "securityProfile": "[if(equals(variables('skuGeneration'), 'gen7-byol'), json('null'), variables('trustedLaunchSecurityProfile'))]",
