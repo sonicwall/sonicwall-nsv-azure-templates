@@ -58,15 +58,56 @@
                 "bladeTitle": "Instance Details",
                 "elements": [
                     {
-                        "name": "nsvPlan",
+                        "name": "nsvModel",
                         "type": "Microsoft.Common.DropDown",
-                        "label": "NSv plan",
-                        "defaultValue": "NSv 7.1 or newer",
-                        "toolTip": "The NSv plan (also known as SKU).",
+                        "label": "NSv model",
+                        "defaultValue": "NSv 470",
+                        "toolTip": "The SonicWall NSv model to deploy. The model determines which image generation is used and which VM sizes are available.",
                         "constraints": {
                             "allowedValues": [
                                 {
-                                    "label": "NSv 7.0",
+                                    "label": "NSv 270",
+                                    "value": "NSv 270"
+                                },
+                                {
+                                    "label": "NSv 470",
+                                    "value": "NSv 470"
+                                },
+                                {
+                                    "label": "NSv 870",
+                                    "value": "NSv 870"
+                                },
+                                {
+                                    "label": "NSv XS",
+                                    "value": "NSv XS"
+                                },
+                                {
+                                    "label": "NSv S",
+                                    "value": "NSv S"
+                                },
+                                {
+                                    "label": "NSv M",
+                                    "value": "NSv M"
+                                },
+                                {
+                                    "label": "NSv L",
+                                    "value": "NSv L"
+                                }
+                            ],
+                            "required": true
+                        },
+                        "visible": true
+                    },
+                    {
+                        "name": "gen7Plan",
+                        "type": "Microsoft.Common.DropDown",
+                        "label": "NSv plan",
+                        "defaultValue": "NSv 7.1 or newer",
+                        "toolTip": "The NSv plan (also known as SKU) for gen7 models. Choose \"NSv 7.1 or newer\" unless you specifically need the legacy 7.0 image.",
+                        "constraints": {
+                            "allowedValues": [
+                                {
+                                    "label": "NSv 7.0 (legacy)",
                                     "value": "snwl-nsv-byol"
                                 },
                                 {
@@ -76,85 +117,146 @@
                             ],
                             "required": true
                         },
+                        "visible": "[or(or(equals(steps('instanceDetails').nsvModel, 'NSv 270'), equals(steps('instanceDetails').nsvModel, 'NSv 470')), equals(steps('instanceDetails').nsvModel, 'NSv 870'))]"
+                    },
+                    {
+                        "name": "gen8PlanInfo",
+                        "type": "Microsoft.Common.InfoBox",
+                        "options": {
+                            "icon": "Info",
+                            "text": "NSv XS, S, M and L deploy from the gen8 plan \"snwl-nsv-scx-gen8\"."
+                        },
+                        "visible": "[not(or(or(equals(steps('instanceDetails').nsvModel, 'NSv 270'), equals(steps('instanceDetails').nsvModel, 'NSv 470')), equals(steps('instanceDetails').nsvModel, 'NSv 870')))]"
+                    },
+                    {
+                        "name": "gen7SizeInfo",
+                        "type": "Microsoft.Common.InfoBox",
+                        "options": {
+                            "icon": "Info",
+                            "text": "The VM size for NSv 270, NSv 470 and NSv 870 is determined by the model and the selected plan; it is not configurable."
+                        },
+                        "visible": "[or(or(equals(steps('instanceDetails').nsvModel, 'NSv 270'), equals(steps('instanceDetails').nsvModel, 'NSv 470')), equals(steps('instanceDetails').nsvModel, 'NSv 870'))]"
+                    },
+                    {
+                        "name": "vmSizeXS",
+                        "type": "Microsoft.Compute.SizeSelector",
+                        "label": "Virtual machine size for NSv XS",
+                        "toolTip": "Sizes certified for the NSv XS model.",
+                        "recommendedSizes": [
+                            "Standard_DS1_v2",
+                            "Standard_B1ms",
+                            "Standard_DC1s_v3"
+                        ],
+                        "constraints": {
+                            "allowedSizes": [
+                                "Standard_DS1_v2",
+                                "Standard_B1ms",
+                                "Standard_DC1ds_v3",
+                                "Standard_DC1s_v3",
+                                "Standard_F1s",
+                                "Standard_DS12-1_v2"
+                            ]
+                        },
+                        "osPlatform": "Linux",
+                        "imageReference": {
+                            "publisher": "sonicwall-inc",
+                            "offer": "sonicwall-nsz-azure",
+                            "sku": "snwl-nsv-scx-gen8"
+                        },
+                        "count": "1",
+                        "visible": "[equals(steps('instanceDetails').nsvModel, 'NSv XS')]"
+                    },
+                    {
+                        "name": "vmSizeS",
+                        "type": "Microsoft.Compute.SizeSelector",
+                        "label": "Virtual machine size for NSv S",
+                        "toolTip": "Sizes certified for the NSv S model.",
+                        "recommendedSizes": [
+                            "Standard_D2ds_v4",
+                            "Standard_D2s_v4",
+                            "Standard_D2d_v4"
+                        ],
+                        "constraints": {
+                            "allowedSizes": [
+                                "Standard_D2d_v4",
+                                "Standard_D2ds_v4",
+                                "Standard_D2s_v4"
+                            ]
+                        },
+                        "osPlatform": "Linux",
+                        "imageReference": {
+                            "publisher": "sonicwall-inc",
+                            "offer": "sonicwall-nsz-azure",
+                            "sku": "snwl-nsv-scx-gen8"
+                        },
+                        "count": "1",
+                        "visible": "[equals(steps('instanceDetails').nsvModel, 'NSv S')]"
+                    },
+                    {
+                        "name": "vmSizeM",
+                        "type": "Microsoft.Compute.SizeSelector",
+                        "label": "Virtual machine size for NSv M",
+                        "toolTip": "Sizes certified for the NSv M model.",
+                        "recommendedSizes": [
+                            "Standard_D4s_v4",
+                            "Standard_D4ds_v4",
+                            "Standard_D4_v4"
+                        ],
+                        "constraints": {
+                            "allowedSizes": [
+                                "Standard_D4_v4",
+                                "Standard_D4s_v4",
+                                "Standard_D4d_v4",
+                                "Standard_D4ds_v4"
+                            ]
+                        },
+                        "osPlatform": "Linux",
+                        "imageReference": {
+                            "publisher": "sonicwall-inc",
+                            "offer": "sonicwall-nsz-azure",
+                            "sku": "snwl-nsv-scx-gen8"
+                        },
+                        "count": "1",
+                        "visible": "[equals(steps('instanceDetails').nsvModel, 'NSv M')]"
+                    },
+                    {
+                        "name": "vmSizeL",
+                        "type": "Microsoft.Compute.SizeSelector",
+                        "label": "Virtual machine size for NSv L",
+                        "toolTip": "Sizes certified for the NSv L model.",
+                        "recommendedSizes": [
+                            "Standard_D8_v4",
+                            "Standard_D8s_v3",
+                            "Standard_D8_v3"
+                        ],
+                        "constraints": {
+                            "allowedSizes": [
+                                "Standard_D8_v4",
+                                "Standard_D8_v3",
+                                "Standard_D8s_v3"
+                            ]
+                        },
+                        "osPlatform": "Linux",
+                        "imageReference": {
+                            "publisher": "sonicwall-inc",
+                            "offer": "sonicwall-nsz-azure",
+                            "sku": "snwl-nsv-scx-gen8"
+                        },
+                        "count": "1",
+                        "visible": "[equals(steps('instanceDetails').nsvModel, 'NSv L')]"
+                    },
+                    {
+                        "name": "imageVersion",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Image version",
+                        "defaultValue": "latest",
+                        "toolTip": "Use \"latest\" for the newest image in the selected plan, or pin a specific version such as \"7.0.2363\".",
+                        "constraints": {
+                            "required": true,
+                            "regex": "^(latest|[0-9]+(\\.[0-9]+){1,3})$",
+                            "validationMessage": "Enter \"latest\" or a version number such as 7.0.2363"
+                        },
                         "visible": true
-                    },
-                    {
-                        "name": "vmSizeSkuSc",
-                        "type": "Microsoft.Compute.SizeSelector",
-                        "label": "Virtual machine size of the \"NSv 7.0\" plan",
-                        "toolTip": "The size of VM to provision.",
-                        "recommendedSizes": [
-                            "Standard_D2_v2",
-                            "Standard_D3_v2",
-                            "Standard_D4_v2",
-                            "Standard_D5_v2",
-							"Standard_B2ms",
-                            "Standard_B4ms",
-                            "Standard_D2ds_v4",
-                            "Standard_D2s_v4",
-                            "Standard_D2_v4",
-                            "Standard_DS3_v2"
-                        ],
-                        "constraints": {
-                            "allowedSizes": [
-                                "Standard_D2_v2",
-                                "Standard_D3_v2",
-                                "Standard_D4_v2",
-                                "Standard_D5_v2",
-							    "Standard_B2ms",
-                                "Standard_B4ms",
-                                "Standard_D2ds_v4",
-                                "Standard_D2s_v4",
-                                "Standard_D2_v4",
-                                "Standard_DS3_v2"
-                            ]
-                        },
-                        "osPlatform": "Linux",
-                        "imageReference": {
-                            "publisher": "sonicwall-inc",
-                            "offer": "sonicwall-nsz-azure",
-                            "sku": "snwl-nsv-byol"
-                        },
-                        "count": "1",
-                        "visible": "[equals(steps('instanceDetails').nsvPlan, 'snwl-nsv-byol')]"
-                    },
-                    {
-                        "name": "vmSizeSkuScx",
-                        "type": "Microsoft.Compute.SizeSelector",
-                        "label": "Virtual machine size of the \"NSv 7.1 or newer\" plan",
-                        "toolTip": "The size of VM to provision.",
-                        "recommendedSizes": [
-                            "Standard_DS2_v2",
-                            "Standard_DS3_v2",
-                            "Standard_DS4_v2",
-                            "Standard_DS5_v2",
-                            "Standard_B2ms",
-                            "Standard_B4ms",
-                            "Standard_D2ds_v4",
-                            "Standard_D2s_v4",
-                            "Standard_D2_v4"
-                        ],
-                        "constraints": {
-                            "allowedSizes": [
-                                "Standard_DS2_v2",
-                                "Standard_DS3_v2",
-                                "Standard_DS4_v2",
-                                "Standard_DS5_v2",
-                                "Standard_B2ms",
-                                "Standard_B4ms",
-                                "Standard_D2ds_v4",
-                                "Standard_D2s_v4",
-                                "Standard_D2_v4"
-                            ]
-                        },
-                        "osPlatform": "Linux",
-                        "imageReference": {
-                            "publisher": "sonicwall-inc",
-                            "offer": "sonicwall-nsz-azure",
-                            "sku": "snwl-nsv-scx"
-                        },
-                        "count": "1",
-                        "visible": "[equals(steps('instanceDetails').nsvPlan, 'snwl-nsv-scx')]"
                     },
                     {
                         "name": "vnetSpec",
@@ -258,9 +360,10 @@
         ],
         "outputs": {
             "vmName": "[basics('vmName')]",
-            "imageSku": "[steps('instanceDetails').nsvPlan]",
-            "vmSizeSc": "[steps('instanceDetails').vmSizeSkuSc]",
-            "vmSizeScx": "[steps('instanceDetails').vmSizeSkuScx]",
+            "nsvModel": "[steps('instanceDetails').nsvModel]",
+            "imageSku": "[if(or(or(equals(steps('instanceDetails').nsvModel, 'NSv 270'), equals(steps('instanceDetails').nsvModel, 'NSv 470')), equals(steps('instanceDetails').nsvModel, 'NSv 870')), steps('instanceDetails').gen7Plan, 'snwl-nsv-scx-gen8')]",
+            "vmSize": "[if(equals(steps('instanceDetails').nsvModel, 'NSv XS'), steps('instanceDetails').vmSizeXS, if(equals(steps('instanceDetails').nsvModel, 'NSv S'), steps('instanceDetails').vmSizeS, if(equals(steps('instanceDetails').nsvModel, 'NSv M'), steps('instanceDetails').vmSizeM, if(equals(steps('instanceDetails').nsvModel, 'NSv L'), steps('instanceDetails').vmSizeL, ''))))]",
+            "imageVersion": "[steps('instanceDetails').imageVersion]",
             "authenticationType": "[basics('SSHCredentials').authenticationType]",
             "SSHPassword": "[coalesce(basics('SSHCredentials').password, basics('SSHCredentials').sshPublicKey)]",
             "sshKey": "[coalesce(basics('SSHCredentials').password, basics('SSHCredentials').sshPublicKey)]",
@@ -273,7 +376,7 @@
             "subnetLANName": "[steps('instanceDetails').vnetSpec.subnets.subnet2.name]",
             "subnetLANPrefix": "[steps('instanceDetails').vnetSpec.subnets.subnet2.addressPrefix]",
             "storageAccountNewOrExisting": "[steps('instanceDetails').storageSpec.newOrExisting]",
-            "storageAccountResourceGroupName": "[steps('instanceDetails').storageSpec.resourceGroup]",
+            "existingStorageAccountRG": "[steps('instanceDetails').storageSpec.resourceGroup]",
             "storageAccount": "[steps('instanceDetails').storageSpec.name]",
             "storageAccountType": "[steps('instanceDetails').storageSpec.type]",
             "managementAccessIPSource": "[steps('instanceDetails').managementCidr]",
@@ -281,7 +384,7 @@
             "publicIpName": "[steps('instanceDetails').publicIpAddress.name]",
             "publicIpDns": "[steps('instanceDetails').publicIpAddress.domainNameLabel]",
             "publicIpResourceGroupName": "[steps('instanceDetails').publicIpAddress.resourceGroup]",
-            "publicIPAllocationMethod": "[steps('instanceDetails').publicIpAddress.publicIPAllocationMethod]",
+            "publicIpAllocationMethod": "[steps('instanceDetails').publicIpAddress.publicIPAllocationMethod]",
             "publicIpSku": "[steps('instanceDetails').publicIpAddress.sku]",
             "location": "[location()]"
         }

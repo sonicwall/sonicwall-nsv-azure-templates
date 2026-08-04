@@ -18,7 +18,7 @@
     "storageAccountType": {
       "type": "string",
       "metadata": {
-        "description": "The type of the Storage Account created"
+        "description": "The redundancy SKU of the general-purpose v2 Storage Account created"
       },
       "defaultValue": "Standard_LRS"
     },
@@ -80,8 +80,13 @@
     "imageSkuType": {
       "type": "string",
       "defaultValue": "scx",
+      "allowedValues": [
+        "scx",
+        "byol",
+        "scx-gen8"
+      ],
       "metadata": {
-        "description": "The type of SKU. Specify \"scx\" for 7.1 images, \"byol\" for 7.0 images or \"scx-gen8\" for 8.2 images."
+        "description": "The type of SKU. Specify \"scx\" for gen7 7.1 or newer images, \"byol\" for gen7 7.0 images or \"scx-gen8\" for gen8 8.2 images. The SKU must match the selected nsvModel: NSv 270, NSv 470 and NSv 870 require a gen7 SKU; NSv XS, NSv S, NSv M and NSv L require \"scx-gen8\". A mismatched combination fails template validation."
       }
     },
     "imageVersion": {
@@ -103,12 +108,41 @@
         "NSv 270",
         "NSv 470",
         "NSv 870",
-        "NSv XS"
+        "NSv XS",
+        "NSv S",
+        "NSv M",
+        "NSv L"
       ],
       "metadata": {
-        "description": "SonicWall-NSv model. Choosing NSv 270, 470 or 870 with SKU \"byol\" will use Standard_D3_v2, Standard_D3_v2, Standard_D4_v2 respectively. Choosing NSv 270, 470 or 870 with SKU \"scx\" will use Standard_DS3_v2, Standard_DS3_v2, Standard_DS4_v2 respectively."
+        "description": "SonicWall-NSv model. Each model deploys a recommended Azure VM size, for both members of the HA pair. NSv 270, NSv 470 and NSv 870 are gen7 models and require a gen7 imageSkuType (\"scx\" or \"byol\"); their size depends on which of the two is selected. NSv XS, NSv S, NSv M and NSv L are gen8 models and require the gen8 imageSkuType (\"scx-gen8\"); to deploy one of them on a different certified size, set the vmSize parameter. Pairing a model with the wrong SKU generation fails template validation."
       },
       "defaultValue": "NSv 470"
+    },
+    "vmSize": {
+      "type": "string",
+      "allowedValues": [
+        "",
+        "Standard_DS1_v2",
+        "Standard_B1ms",
+        "Standard_DC1ds_v3",
+        "Standard_DC1s_v3",
+        "Standard_F1s",
+        "Standard_DS12-1_v2",
+        "Standard_D2d_v4",
+        "Standard_D2ds_v4",
+        "Standard_D2s_v4",
+        "Standard_D4_v4",
+        "Standard_D4s_v4",
+        "Standard_D4d_v4",
+        "Standard_D4ds_v4",
+        "Standard_D8_v4",
+        "Standard_D8_v3",
+        "Standard_D8s_v3"
+      ],
+      "metadata": {
+        "description": "Azure VM size to deploy for both members of the HA pair. Leave empty to use the recommended size for the selected NSv model. Applies to the gen8 models NSv XS, NSv S, NSv M and NSv L only; it is ignored for NSv 270, NSv 470 and NSv 870, whose sizes are determined by the gen7 SKU selected. When set, the size must be one certified for the selected model: NSv XS - Standard_DS1_v2, Standard_B1ms, Standard_DC1ds_v3, Standard_DC1s_v3, Standard_F1s, Standard_DS12-1_v2; NSv S - Standard_D2d_v4, Standard_D2ds_v4, Standard_D2s_v4; NSv M - Standard_D4_v4, Standard_D4s_v4, Standard_D4d_v4, Standard_D4ds_v4; NSv L - Standard_D8_v4, Standard_D8_v3, Standard_D8s_v3. Note that an HA deployment creates two VMs, so the selected size consumes twice its vCPU quota."
+      },
+      "defaultValue": ""
     },
     "virtualNetworkNewOrExisting": {
       "type": "string",
@@ -205,7 +239,7 @@
         "Static"
       ],
       "metadata": {
-        "description": "Allocation method for the public ip address"
+        "description": "Allocation method for the public ip address. Standard SKU public IP addresses support static allocation only."
       }
     },
     "publicIpSku": {
@@ -215,7 +249,7 @@
         "Standard"
       ],
       "metadata": {
-        "description": "Name of the resource group for the public ip address"
+        "description": "SKU of the public ip address. Basic SKU public IP addresses were retired on 30 September 2025 and can no longer be created."
       }
     },
     "createInternalLoadBalancer": {
@@ -243,7 +277,6 @@
     "vm1NicName": "[concat(variables('vm1Name'), '-interface')]",
     "vm2NicName": "[concat(variables('vm2Name'), '-interface')]",
     "vmNicNameFmt": "{0}-HA{1}-interface-{2}",
-    "publicIPAddressType": "Dynamic",
     "nsgname-mgmt": "[concat(parameters('vmName'), '-NSG')]",
     "availabilitySetName": "[concat(parameters('vmName'), '-AvSet')]",
     "publicIpAddressId": "[resourceId(parameters('publicIpResourceGroupName'), 'Microsoft.Network/publicIPAddresses', parameters('publicIpName'))]",
@@ -270,12 +303,38 @@
         "vTpmEnabled": true
       }
     },
-    "vmSize": {
-      "NSv 270": "[if(sonicwall.isLegacySku(variables('imageSku')), 'Standard_D3_v2', 'Standard_DS3_v2')]",
-      "NSv 470": "[if(sonicwall.isLegacySku(variables('imageSku')), 'Standard_D3_v2', 'Standard_DS3_v2')]",
-      "NSv 870": "[if(sonicwall.isLegacySku(variables('imageSku')), 'Standard_D4_v2', 'Standard_DS4_v2')]",
-      "NSv XS": "Standard_DS1_v2"
+    "vmSizeByModelAndGeneration": {
+      "supported: NSv 270 on gen7-byol": "Standard_D2_v2",
+      "supported: NSv 270 on gen7-scx": "Standard_DS2_v2",
+      "supported: NSv 470 on gen7-byol": "Standard_D3_v2",
+      "supported: NSv 470 on gen7-scx": "Standard_D4s_v4",
+      "supported: NSv 870 on gen7-byol": "Standard_D4_v2",
+      "supported: NSv 870 on gen7-scx": "Standard_DS4_v2",
+      "supported: NSv XS on gen8": "[if(or(empty(parameters('vmSize')), not(equals(parameters('nsvModel'), 'NSv XS'))), 'Standard_DS1_v2', variables('certifiedVmSizes')[concat('certified: ', parameters('nsvModel'), ' with ', parameters('vmSize'))])]",
+      "supported: NSv S on gen8": "[if(or(empty(parameters('vmSize')), not(equals(parameters('nsvModel'), 'NSv S'))), 'Standard_D2ds_v4', variables('certifiedVmSizes')[concat('certified: ', parameters('nsvModel'), ' with ', parameters('vmSize'))])]",
+      "supported: NSv M on gen8": "[if(or(empty(parameters('vmSize')), not(equals(parameters('nsvModel'), 'NSv M'))), 'Standard_D4s_v4', variables('certifiedVmSizes')[concat('certified: ', parameters('nsvModel'), ' with ', parameters('vmSize'))])]",
+      "supported: NSv L on gen8": "[if(or(empty(parameters('vmSize')), not(equals(parameters('nsvModel'), 'NSv L'))), 'Standard_D8_v4', variables('certifiedVmSizes')[concat('certified: ', parameters('nsvModel'), ' with ', parameters('vmSize'))])]"
     },
+    "certifiedVmSizes": {
+      "certified: NSv XS with Standard_DS1_v2": "Standard_DS1_v2",
+      "certified: NSv XS with Standard_B1ms": "Standard_B1ms",
+      "certified: NSv XS with Standard_DC1ds_v3": "Standard_DC1ds_v3",
+      "certified: NSv XS with Standard_DC1s_v3": "Standard_DC1s_v3",
+      "certified: NSv XS with Standard_F1s": "Standard_F1s",
+      "certified: NSv XS with Standard_DS12-1_v2": "Standard_DS12-1_v2",
+      "certified: NSv S with Standard_D2d_v4": "Standard_D2d_v4",
+      "certified: NSv S with Standard_D2ds_v4": "Standard_D2ds_v4",
+      "certified: NSv S with Standard_D2s_v4": "Standard_D2s_v4",
+      "certified: NSv M with Standard_D4_v4": "Standard_D4_v4",
+      "certified: NSv M with Standard_D4s_v4": "Standard_D4s_v4",
+      "certified: NSv M with Standard_D4d_v4": "Standard_D4d_v4",
+      "certified: NSv M with Standard_D4ds_v4": "Standard_D4ds_v4",
+      "certified: NSv L with Standard_D8_v4": "Standard_D8_v4",
+      "certified: NSv L with Standard_D8_v3": "Standard_D8_v3",
+      "certified: NSv L with Standard_D8s_v3": "Standard_D8s_v3"
+    },
+    "skuGeneration": "[if(sonicwall.isLegacySku(variables('imageSku')), 'gen7-byol', if(contains(toLower(variables('imageSku')), 'gen8'), 'gen8', 'gen7-scx'))]",
+    "resolvedVmSize": "[variables('vmSizeByModelAndGeneration')[concat('supported: ', parameters('nsvModel'), ' on ', variables('skuGeneration'))]]",
     "ilbName": "[concat(parameters('vmName'), '-ILB')]",
     "ilbID": "[resourceId('Microsoft.Network/loadBalancers',variables('ilbName'))]",
     "ilbPoolID": "[concat(variables('ilbID'),'/backendAddressPools/BackendPoolLan')]",
@@ -309,10 +368,10 @@
     {
       "condition": "[equals(parameters('storageAccountNewOrExisting'), 'new')]",
       "type": "Microsoft.Storage/storageAccounts",
-      "apiVersion": "2018-02-01",
+      "apiVersion": "2022-05-01",
       "name": "[parameters('storageAccount')]",
       "location": "[parameters('location')]",
-      "kind": "Storage",
+      "kind": "StorageV2",
       "sku": {
         "name": "[parameters('storageAccountType')]"
       }
@@ -742,7 +801,7 @@
           "id": "[resourceId('Microsoft.Compute/availabilitySets', variables('availabilitySetName'))]"
         },
         "hardwareProfile": {
-          "vmSize": "[variables('vmSize')[parameters('nsvModel')]]"
+          "vmSize": "[variables('resolvedVmSize')]"
         },
         "osProfile": {
           "computerName": "[format(variables('vmNameFmt'), parameters('vmName'), copyIndex('VmLoop', 1))]",
@@ -750,7 +809,7 @@
           "adminPassword": "[if(equals(parameters('authenticationType'), 'password'), parameters('SSHPassword'), json('null'))]",
           "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'sshPublicKey'), variables('linuxConfigurationObj'), json('null'))]"
         },
-        "securityProfile": "[if(sonicwall.isLegacySku(variables('imageSku')), json('null'), variables('trustedLaunchSecurityProfile'))]",
+        "securityProfile": "[if(equals(variables('skuGeneration'), 'gen7-byol'), json('null'), variables('trustedLaunchSecurityProfile'))]",
         "storageProfile": {
           "imageReference": {
             "publisher": "[variables('imagePublisher')]",
