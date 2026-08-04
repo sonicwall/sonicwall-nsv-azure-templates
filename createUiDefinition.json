@@ -260,7 +260,7 @@
                         "defaultValue": "latest",
                         "toolTip": "Select \"latest\" to always deploy the newest available image, or choose a specific version to pin the deployment.",
                         "constraints": {
-                            "allowedValues": "[concat(array(createObject('label', 'latest (always newest)', 'value', 'latest')), map(steps('instanceDetails').imageVersionsList.value, (v) => createObject('label', v.name, 'value', v.name)))]",
+                            "allowedValues": "[concat(array(createObject('label', 'latest (always newest)', 'value', 'latest')), map(steps('instanceDetails').imageVersionsList, (v) => createObject('label', v.name, 'value', v.name)))]",
                             "required": true
                         },
                         "visible": true
