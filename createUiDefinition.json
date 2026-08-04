@@ -246,6 +246,27 @@
                         "visible": "[equals(steps('instanceDetails').nsvModel, 'NSv L')]"
                     },
                     {
+                        "name": "imageVersionChoice",
+                        "type": "Microsoft.Common.OptionsGroup",
+                        "label": "Image version",
+                        "defaultValue": "latest",
+                        "toolTip": "Choose \"latest\" to always deploy the newest available image, or select a specific version to pin the deployment.",
+                        "constraints": {
+                            "allowedValues": [
+                                {
+                                    "label": "latest (always newest)",
+                                    "value": "latest"
+                                },
+                                {
+                                    "label": "Specific version",
+                                    "value": "specific"
+                                }
+                            ],
+                            "required": true
+                        },
+                        "visible": true
+                    },
+                    {
                         "name": "imageVersionsList",
                         "type": "Microsoft.Solutions.ArmApiControl",
                         "request": {
@@ -257,16 +278,15 @@
                         }
                     },
                     {
-                        "name": "imageVersion",
+                        "name": "imageVersionPinned",
                         "type": "Microsoft.Common.DropDown",
-                        "label": "Image version",
-                        "defaultValue": "latest",
-                        "toolTip": "Select \"latest\" to always deploy the newest available image, or choose a specific version to pin the deployment.",
+                        "label": "Specific version",
+                        "toolTip": "Select the exact image version to deploy.",
                         "constraints": {
-                            "allowedValues": "[concat(array(createObject('label', 'latest (always newest)', 'value', 'latest')), steps('instanceDetails').imageVersionsList.transformed.list)]",
+                            "allowedValues": "[steps('instanceDetails').imageVersionsList.transformed.list]",
                             "required": true
                         },
-                        "visible": true
+                        "visible": "[equals(steps('instanceDetails').imageVersionChoice, 'specific')]"
                     },
                     {
                         "name": "vnetSpec",
@@ -373,7 +393,7 @@
             "nsvModel": "[steps('instanceDetails').nsvModel]",
             "imageSku": "[if(or(or(equals(steps('instanceDetails').nsvModel, 'NSv 270'), equals(steps('instanceDetails').nsvModel, 'NSv 470')), equals(steps('instanceDetails').nsvModel, 'NSv 870')), steps('instanceDetails').gen7Plan, 'snwl-nsv-scx-gen8')]",
             "vmSize": "[if(equals(steps('instanceDetails').nsvModel, 'NSv XS'), steps('instanceDetails').vmSizeXS, if(equals(steps('instanceDetails').nsvModel, 'NSv S'), steps('instanceDetails').vmSizeS, if(equals(steps('instanceDetails').nsvModel, 'NSv M'), steps('instanceDetails').vmSizeM, if(equals(steps('instanceDetails').nsvModel, 'NSv L'), steps('instanceDetails').vmSizeL, ''))))]",
-            "imageVersion": "[steps('instanceDetails').imageVersion]",
+            "imageVersion": "[if(equals(steps('instanceDetails').imageVersionChoice, 'latest'), 'latest', steps('instanceDetails').imageVersionPinned)]",
             "authenticationType": "[basics('SSHCredentials').authenticationType]",
             "SSHPassword": "[coalesce(basics('SSHCredentials').password, basics('SSHCredentials').sshPublicKey)]",
             "sshKey": "[coalesce(basics('SSHCredentials').password, basics('SSHCredentials').sshPublicKey)]",
