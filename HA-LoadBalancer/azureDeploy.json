@@ -277,7 +277,6 @@
     "vm1NicName": "[concat(variables('vm1Name'), '-interface')]",
     "vm2NicName": "[concat(variables('vm2Name'), '-interface')]",
     "vmNicNameFmt": "{0}-HA{1}-interface-{2}",
-    "publicIPAddressType": "Dynamic",
     "nsgname-mgmt": "[concat(parameters('vmName'), '-NSG')]",
     "availabilitySetName": "[concat(parameters('vmName'), '-AvSet')]",
     "publicIpAddressId": "[resourceId(parameters('publicIpResourceGroupName'), 'Microsoft.Network/publicIPAddresses', parameters('publicIpName'))]",
