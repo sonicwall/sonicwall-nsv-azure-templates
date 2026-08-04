@@ -1,0 +1,1049 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().Location]",
+            "metadata": {
+                "description": "Geo-Location to deploy SonicWall NSv"
+            }
+        },
+        "storageAccount": {
+            "type": "string",
+            "metadata": {
+                "description": "Globally unique lowercase name of your storage account"
+            }
+        },
+        "storageAccountType": {
+            "type": "string",
+            "metadata": {
+                "description": "The type of the Storage Account created"
+            },
+            "defaultValue": "Standard_LRS"
+        },
+        "storageAccountNewOrExisting": {
+            "type": "string",
+            "defaultValue": "new",
+            "allowedValues": [
+                "new",
+                "existing"
+            ],
+            "metadata": {
+                "Description": "Indicates whether the Storage Account is new or existing"
+            }
+        },
+        "vmNamePrefix": {
+            "type": "string",
+            "metadata": {
+                "description": "Name Prefix of SonicWall-NSv HA VMs in the Azure portal. \nThe names of the two VMs will be suffixed with -HA1/-HA2."
+            }
+        },
+        "SSHUserName": {
+            "type": "string",
+            "defaultValue": "management",
+            "metadata": {
+                "description": "Username for SSH access to SonicWall-NSv console"
+            }
+        },
+        "authenticationType": {
+            "type": "string",
+            "metadata": {
+                "descritpion": "Type of authentication "
+            },
+            "allowedValues": [
+                "sshPublicKey",
+                "password"
+            ],
+            "defaultValue": "password"
+        },
+        "SSHPassword": {
+            "type": "securestring",
+            "defaultValue": "",
+            "metadata": {
+                "description": "The password for the above SSH user. Password must contain one non alpha-numeric character, one uppercase alpha-numeric character and one numeric character"
+            }
+        },
+        "sshKey": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "SSH rsa public key file as a string."
+            }
+        },
+        "imageSku": {
+            "type": "string",
+            "defaultValue": "snwl-nsv-scx",
+            "metadata": {
+                "description": "The name of the Azure product SKU to load"
+            }
+        },
+        "imageVersion": {
+            "type": "string",
+            "defaultValue": "latest",
+            "metadata": {
+                "description": "The version of the loaded NSv image"
+            }
+        },
+        "managementAccessIPSource": {
+            "type": "string",
+            "metadata": {
+                "description": "Public IP address allowed access SonicWall NSv HTTPS & SSH management "
+            },
+            "defaultValue": "0.0.0.0/0"
+        },
+        "nsvModel": {
+            "type": "string",
+            "allowedValues": [
+                "NSv 270",
+                "NSv 470",
+                "NSv 870",
+                "NSv XS"
+            ],
+            "metadata": {
+                "description": "SonicWall-NSv model, NSv 270 VM size Standard_DS3_v2 or Standard_D3_v2, NSv 470 VM size Standard_DS3_v2 or Standard_D3_v2, NSv 870 VM size Standard_DS4_v2 or Standard_D4_v2, depending on the SKU selected"
+            },
+            "defaultValue": "NSv 470"
+        },
+        "virtualNetworkNewOrExisting": {
+            "type": "string",
+            "defaultValue": "new",
+            "allowedValues": [
+                "new",
+                "existing"
+            ],
+            "metadata": {
+                "description": "Determines whether or not a new virtual network should be provisioned."
+            }
+        },
+        "virtualNetworkName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the virtual network that the consumer wants to use"
+            },
+            "defaultValue": "firewallVnet"
+        },
+        "virtualNetworkAddressPrefix": {
+            "type": "string",
+            "defaultValue": "192.168.0.0/16",
+            "metadata": {
+                "description": "Virtual network address CIDR"
+            }
+        },
+        "virtualNetworkResourceGroupName": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().name]",
+            "metadata": {
+                "description": "Name of the resource group for the existing virtual network"
+            }
+        },
+        "subnetWANName": {
+            "type": "string",
+            "defaultValue": "WAN-X1",
+            "metadata": {
+                "description": "Subnet for the WAN (X1)"
+            }
+        },
+        "subnetLANName": {
+            "type": "string",
+            "defaultValue": "LAN-X0",
+            "metadata": {
+                "description": "Subnet for the LAN (X0)"
+            }
+        },
+        "subnetHAName": {
+            "type": "string",
+            "defaultValue": "HA-X2",
+            "metadata": {
+                "description": "Subnet for the HA (X2)"
+            }
+        },
+        "subnetWANPrefix": {
+            "type": "string",
+            "defaultValue": "192.168.1.0/24",
+            "metadata": {
+                "description": "WAN (X1) subnet CIDR"
+            }
+        },
+        "subnetLANPrefix": {
+            "type": "string",
+            "defaultValue": "192.168.0.0/24",
+            "metadata": {
+                "description": "LAN (X0) subnet CIDR"
+            }
+        },
+        "subnetHAPrefix": {
+            "type": "string",
+            "defaultValue": "192.168.2.0/24",
+            "metadata": {
+                "description": "HA (X2) subnet CIDR"
+            }
+        },
+        "HA1PublicIpNewOrExisting": {
+            "type": "string",
+            "defaultValue": "new",
+            "metadata": {
+                "description": "Determines whether or not a new public ip should be provisioned."
+            }
+        },
+        "HA1PublicIpName": {
+            "type": "string",
+            "defaultValue": "HA1PublicIp",
+            "metadata": {
+                "description": "Name of the public ip address"
+            }
+        },
+        "HA1PublicIpDns": {
+            "type": "string",
+            "defaultValue": "[concat('sonicwall-nsv-ha1-', uniqueString(resourceGroup().id))]",
+            "metadata": {
+                "description": "DNS of the public ip address for the VM"
+            }
+        },
+        "HA1PublicIpResourceGroupName": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().name]",
+            "metadata": {
+                "description": "Name of the resource group for the public ip address"
+            }
+        },
+        "HA1PublicIpAllocationMethod": {
+            "type": "string",
+            "defaultValue": "Dynamic",
+            "allowedValues": [
+                "Dynamic",
+                "Static"
+            ],
+            "metadata": {
+                "description": "Allocation method for the public ip address"
+            }
+        },
+        "HA1PublicIpSku": {
+            "type": "string",
+            "defaultValue": "Basic",
+            "allowedValues": [
+                "Basic",
+                "Standard"
+            ],
+            "metadata": {
+                "description": "Name of the resource group for the public ip address"
+            }
+        },
+        "HA2PublicIpNewOrExisting": {
+            "type": "string",
+            "defaultValue": "new",
+            "metadata": {
+                "description": "Determines whether or not a new public ip should be provisioned."
+            }
+        },
+        "HA2PublicIpName": {
+            "type": "string",
+            "defaultValue": "HA2PublicIp",
+            "metadata": {
+                "description": "Name of the public ip address"
+            }
+        },
+        "HA2PublicIpDns": {
+            "type": "string",
+            "defaultValue": "[concat('sonicwall-nsv-ha2-', uniqueString(resourceGroup().id))]",
+            "metadata": {
+                "description": "DNS of the public ip address for the VM"
+            }
+        },
+        "HA2PublicIpResourceGroupName": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().name]",
+            "metadata": {
+                "description": "Name of the resource group for the public ip address"
+            }
+        },
+        "HA2PublicIpAllocationMethod": {
+            "type": "string",
+            "defaultValue": "Dynamic",
+            "allowedValues": [
+                "Dynamic",
+                "Static"
+            ],
+            "metadata": {
+                "description": "Allocation method for the public ip address"
+            }
+        },
+        "HA2PublicIpSku": {
+            "type": "string",
+            "defaultValue": "Basic",
+            "allowedValues": [
+                "Basic",
+                "Standard"
+            ],
+            "metadata": {
+                "description": "Name of the resource group for the public ip address"
+            }
+        },
+        "HAFloatPublicIpNewOrExisting": {
+            "type": "string",
+            "defaultValue": "new",
+            "metadata": {
+                "description": "Determines whether or not a new public ip should be provisioned."
+            }
+        },
+        "HAFloatPublicIpName": {
+            "type": "string",
+            "defaultValue": "HAFloatPublicIp",
+            "metadata": {
+                "description": "Name of the public ip address"
+            }
+        },
+        "HAFloatPublicIpDns": {
+            "type": "string",
+            "defaultValue": "[concat('sonicwall-nsv-', uniqueString(resourceGroup().id))]",
+            "metadata": {
+                "description": "DNS of the public ip address for the VM"
+            }
+        },
+        "HAFloatPublicIpResourceGroupName": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().name]",
+            "metadata": {
+                "description": "Name of the resource group for the public ip address"
+            }
+        },
+        "HAFloatPublicIpAllocationMethod": {
+            "type": "string",
+            "defaultValue": "Static",
+            "allowedValues": [
+                "Static"
+            ],
+            "metadata": {
+                "description": "Allocation method for the public ip address"
+            }
+        },
+        "HAFloatPublicIpSku": {
+            "type": "string",
+            "defaultValue": "Basic",
+            "allowedValues": [
+                "Basic",
+                "Standard"
+            ],
+            "metadata": {
+                "description": "Name of the resource group for the public ip address"
+            }
+        }
+    },
+    "variables": {
+        "trustedLaunchSecurityProfile": {
+            "securityType": "TrustedLaunch",
+            "uefiSettings": {
+                "secureBootEnabled": false,
+                "vTpmEnabled": true
+            }
+        },
+        "vmModels": {
+            "NSv 270": "[if(sonicwall.isLegacySku(parameters('imageSku')), 'Standard_D3_v2', 'Standard_DS3_v2')]",
+            "NSv 470": "[if(sonicwall.isLegacySku(parameters('imageSku')), 'Standard_D3_v2', 'Standard_DS3_v2')]",
+            "NSv 870": "[if(sonicwall.isLegacySku(parameters('imageSku')), 'Standard_D4_v2', 'Standard_DS4_v2')]",
+            "NSv XS": "Standard_DS12-1_v2"
+        },
+        "vmSize": "[variables('vmModels')[parameters('nsvModel')]]",
+        "imagePublisher": "sonicwall-inc",
+        "imageOffer": "sonicwall-nsz-azure",
+        "imageVersionNumberPrefix": "[if(equals(indexOf(parameters('imageVersion'), '.'), -1), '0.0.', '')]",
+        "imageVersionNumber": "[concat(variables('imageVersionNumberPrefix'), parameters('imageVersion'))]",
+        "imageVersion": "[if(equals(parameters('imageVersion'), 'latest'), 'latest', variables('imageVersionNumber'))]",
+        "Vm1Name": "[concat(parameters('vmNamePrefix'), '-HA1')]",
+        "Vm2Name": "[concat(parameters('vmNamePrefix'), '-HA2')]",
+        "HA1NicName": "[concat(parameters('vmNamePrefix'), '-HA1-interface')]",
+        "HA2NicName": "[concat(parameters('vmNamePrefix'), '-HA2-interface')]",
+        "nsgname-mgmt": "[concat(parameters('vmNamePrefix'), '-NSG')]",
+        "availabilitySetName": "[concat(parameters('vmNamePrefix'), '-AvSet')]",
+        "lan-default-rt": "[concat(parameters('subnetLANName'), '-RT')]",
+        "HA1PublicIpAddressId": {
+            "id": "[resourceId(parameters('HA1PublicIpResourceGroupName'), 'Microsoft.Network/publicIPAddresses', parameters('HA1PublicIpName'))]"
+        },
+        "HA2PublicIpAddressId": {
+            "id": "[resourceId(parameters('HA2PublicIpResourceGroupName'), 'Microsoft.Network/publicIPAddresses', parameters('HA2PublicIpName'))]"
+        },
+        "HAFloatPublicIpAddressId": {
+            "id": "[resourceId(parameters('HAFloatPublicIpResourceGroupName'), 'Microsoft.Network/publicIPAddresses', parameters('HAFloatPublicIpName'))]"
+        },
+        "IPRangeInMask": {
+            "24": 256, "25": 128, "26": 64, "27": 32, "28": 16, "29": 8
+        },
+        "subnetWANPrefixLen": "[substring(parameters('subnetWANPrefix'), add(indexOf(parameters('subnetWANPrefix'), '/'), 1))]",
+        "subnetWANIPLast": "[int(substring(parameters('subnetWANPrefix'), add(lastIndexOf(parameters('subnetWANPrefix'), '.'), 1), sub(indexOf(parameters('subnetWANPrefix'), '/'), add(lastIndexOf(parameters('subnetWANPrefix'), '.'), 1))))]",
+        "subnetWANRange": "[if(less(int(variables('subnetWANPrefixLen')), 24), 256, variables('IPRangeInMask')[variables('subnetWANPrefixLen')])]",
+        "HASubnetWANFloatIPSuffix": "[string(sub(mul(variables('subnetWANRange'), add(div(variables('subnetWANIPLast'), variables('subnetWANRange')), 1)), 2))]",
+        "subnetLANPrefixLen": "[substring(parameters('subnetLANPrefix'), add(indexOf(parameters('subnetLANPrefix'), '/'), 1))]",
+        "subnetLANIPLast": "[int(substring(parameters('subnetLANPrefix'), add(lastIndexOf(parameters('subnetLANPrefix'), '.'), 1), sub(indexOf(parameters('subnetLANPrefix'), '/'), add(lastIndexOf(parameters('subnetLANPrefix'), '.'), 1))))]",
+        "subnetLANRange": "[if(less(int(variables('subnetLANPrefixLen')), 24), 256, variables('IPRangeInMask')[variables('subnetLANPrefixLen')])]",
+        "HASubnetLANFloatIPSuffix": "[string(sub(mul(variables('subnetLANRange'), add(div(variables('subnetLANIPLast'), variables('subnetLANRange')), 1)), 2))]",
+        "unusedSshKeyToSkipCheck": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAAQQCEn1Vu+191kTYzCJ3EP14BMphL/WUf1oqGyZSPqzG6N16+i6HiHTC1xNaXz5ZPvWn50rf4mR0ftupmxtOJxD7D",
+        "sshKey": "[if(equals(parameters('authenticationType'), 'password'), variables('unusedSshKeyToSkipCheck'), parameters('sshKey'))]",
+        "Vm1SshPasswordOsProfile": {
+            "computerName": "[variables('Vm1Name')]",
+            "adminUsername": "[parameters('SSHUsername')]",
+            "adminPassword": "[parameters('SSHPassword')]"
+        },
+        "Vm1SshKeyOsProfile": {
+            "computerName": "[variables('Vm1Name')]",
+            "adminUsername": "[parameters('SSHUsername')]",
+            "linuxConfiguration": {
+                "disablePasswordAuthentication": true,
+                "ssh": {
+                    "publicKeys": [
+                        {
+                            "path": "[concat('/home/', parameters('SSHUserName'), '/.ssh/authorized_keys')]",
+                            "keyData": "[variables('sshKey')]"
+                        }
+                    ]
+                }
+            }
+        },
+        "Vm2SshPasswordOsProfile": {
+            "computerName": "[variables('Vm2Name')]",
+            "adminUsername": "[parameters('SSHUsername')]",
+            "adminPassword": "[parameters('SSHPassword')]"
+        },
+        "Vm2SshKeyOsProfile": {
+            "computerName": "[variables('Vm2Name')]",
+            "adminUsername": "[parameters('SSHUsername')]",
+            "linuxConfiguration": {
+                "disablePasswordAuthentication": true,
+                "ssh": {
+                    "publicKeys": [
+                        {
+                            "path": "[concat('/home/', parameters('SSHUserName'), '/.ssh/authorized_keys')]",
+                            "keyData": "[variables('sshKey')]"
+                        }
+                    ]
+                }
+            }
+        },
+        "RoleContributor": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', 'b24988ac-6180-42a0-ab88-20f7382dd24c')]"
+    },
+    "functions": [
+        {
+            "namespace": "sonicwall",
+            "members": {
+                "isLegacySku": {
+                    "parameters": [
+                        {
+                            "name": "sku",
+                            "type": "string"
+                        }
+                    ],
+                    "output": {
+                        "type": "bool",
+                        "value": "[contains(createArray('snwl-nsv-654-beta-r', 'snwl-nsv-beta-i', 'snwl-nsv-beta-p', 'snwl-nsv-beta-q', 'snwl-nsv-byol', 'snwl-nsv-byol-654', 'snwl-nsv-byol-v4'), toLower(parameters('sku')))]"
+                    }
+                }
+            }
+        }
+    ],
+    "resources": [
+        {
+            "condition": "[equals(parameters('storageAccountNewOrExisting'), 'new')]",
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2018-02-01",
+            "name": "[parameters('storageAccount')]",
+            "location": "[parameters('location')]",
+            "kind": "Storage",
+            "sku": {
+                "name": "[parameters('storageAccountType')]"
+            }
+        },
+        {
+            "type": "Microsoft.Compute/availabilitySets",
+            "name": "[variables('availabilitySetName')]",
+            "apiVersion": "2018-10-01",
+            "location": "[parameters('location')]",
+            "properties": {
+                "platformFaultDomainCount": 2,
+                "platformUpdateDomainCount": 5
+            },
+            "sku": {
+                "name": "Aligned"
+            }
+        },
+        {
+            "condition": "[equals(parameters('HA1PublicIpNewOrExisting'), 'new')]",
+            "type": "Microsoft.Network/publicIPAddresses",
+            "apiVersion": "2018-04-01",
+            "name": "[parameters('HA1PublicIpName')]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "[parameters('HA1PublicIpSku')]"
+            },
+            "properties": {
+                "publicIPAllocationMethod": "[parameters('HA1PublicIpAllocationMethod')]",
+                "dnsSettings": {
+                    "domainNameLabel": "[parameters('HA1PublicIpDns')]"
+                }
+            }
+        },
+        {
+            "condition": "[equals(parameters('HA2PublicIpNewOrExisting'), 'new')]",
+            "type": "Microsoft.Network/publicIPAddresses",
+            "apiVersion": "2018-04-01",
+            "name": "[parameters('HA2PublicIpName')]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "[parameters('HA2PublicIpSku')]"
+            },
+            "properties": {
+                "publicIPAllocationMethod": "[parameters('HA2PublicIpAllocationMethod')]",
+                "dnsSettings": {
+                    "domainNameLabel": "[parameters('HA2PublicIpDns')]"
+                }
+            }
+        },
+        {
+            "condition": "[equals(parameters('HAFloatPublicIpNewOrExisting'), 'new')]",
+            "type": "Microsoft.Network/publicIPAddresses",
+            "apiVersion": "2018-04-01",
+            "name": "[parameters('HAFloatPublicIpName')]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "[parameters('HAFloatPublicIpSku')]"
+            },
+            "properties": {
+                "publicIPAllocationMethod": "[parameters('HAFloatPublicIpAllocationMethod')]",
+                "dnsSettings": {
+                    "domainNameLabel": "[parameters('HAFloatPublicIpDns')]"
+                }
+            }
+        },
+        {
+            "condition": "[equals(parameters('virtualNetworkNewOrExisting'), 'new')]",
+            "type": "Microsoft.Network/virtualNetworks",
+            "apiVersion": "2018-04-01",
+            "name": "[parameters('virtualNetworkName')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[concat('Microsoft.Network/networkSecurityGroups/', variables('nsgname-mgmt'))]",
+                "[concat('Microsoft.Network/routeTables/', variables('lan-default-rt'))]"
+            ],
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[parameters('virtualNetworkAddressPrefix')]"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "[parameters('subnetWANName')]",
+                        "properties": {
+                            "addressPrefix": "[parameters('subnetWANPrefix')]",
+                            "networkSecurityGroup": {
+                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgname-mgmt'))]"
+                            }
+                        }
+                    },
+                    {
+                        "name": "[parameters('subnetLANName')]",
+                        "properties": {
+                            "addressPrefix": "[parameters('subnetLANPrefix')]",
+                            "routeTable": {
+                                "id": "[resourceId('Microsoft.Network/routeTables', variables('lan-default-rt'))]"
+                            }
+                        }
+                    },
+                    {
+                        "name": "[parameters('subnetHAName')]",
+                        "properties": {
+                            "addressPrefix": "[parameters('subnetHAPrefix')]"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "apiVersion": "2018-04-01",
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "name": "[concat(parameters('vmNamePrefix'), '-NSG')]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "Allow-HTTPS-management-from-IP",
+                        "properties": {
+                            "description": "Allow management from CIDR",
+                            "protocol": "Tcp",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "443",
+                            "sourceAddressPrefix": "[parameters('managementAccessIPSource')]",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 100,
+                            "direction": "Inbound"
+                        }
+                    },
+                    {
+                        "name": "Allow-SSH-management-from-IP",
+                        "properties": {
+                            "description": "Allow management from CIDR",
+                            "protocol": "Tcp",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "22",
+                            "sourceAddressPrefix": "[parameters('managementAccessIPSource')]",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 101,
+                            "direction": "Inbound"
+                        }
+                    },
+                    {
+                        "name": "Allow-HTTP-management-from-IP",
+                        "properties": {
+                            "description": "Allow management from CIDR",
+                            "protocol": "Tcp",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "80",
+                            "sourceAddressPrefix": "[parameters('managementAccessIPSource')]",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 102,
+                            "direction": "Inbound"
+                        }
+                    },
+                    {
+                        "name": "Allow-AzureLoadBalancer",
+                        "properties": {
+                            "description": "Allow AzureLoadBalancer",
+                            "protocol": "Tcp",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "*",
+                            "sourceAddressPrefix": "168.63.129.16",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 103,
+                            "direction": "Inbound"
+                        }
+                    },
+                    {
+                        "name": "Deny-HTTPS-management",
+                        "properties": {
+                            "description": "Deny HTTPS",
+                            "protocol": "Tcp",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "443",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Deny",
+                            "priority": 200,
+                            "direction": "Inbound"
+                        }
+                    },
+                    {
+                        "name": "Deny-SSH-management",
+                        "properties": {
+                            "description": "Deny SSH",
+                            "protocol": "Tcp",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "22",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Deny",
+                            "priority": 201,
+                            "direction": "Inbound"
+                        }
+                    },
+                    {
+                        "name": "Deny-HTTP-management",
+                        "properties": {
+                            "description": "Deny HTTP",
+                            "protocol": "Tcp",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "80",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Deny",
+                            "priority": 202,
+                            "direction": "Inbound"
+                        }
+                    },
+                    {
+                        "name": "Default-Allow",
+                        "properties": {
+                            "description": "Allow all other traffic so firewall can do its job",
+                            "protocol": "*",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "*",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 300,
+                            "direction": "Inbound"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/routeTables",
+            "apiVersion": "2018-11-01",
+            "condition": "[equals(parameters('virtualNetworkNewOrExisting'), 'new')]",
+            "name": "[concat(parameters('subnetLANName'), '-RT')]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "routes": [
+                    {
+                        "name": "[concat(parameters('subnetLANName'), '-Default-Route')]",
+                        "properties": {
+                            "addressPrefix": "0.0.0.0/0",
+                            "nextHopType": "VirtualAppliance",
+                            "nextHopIpAddress": "[concat(substring(parameters('subnetLANPrefix'), 0, lastIndexOf(parameters('subnetLANPrefix'), '.')), '.', variables('HASubnetLANFloatIPSuffix'))]"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "apiVersion": "2018-04-01",
+            "type": "Microsoft.Network/networkInterfaces",
+            "name": "[concat(variables('HA1NicName'), '-X1')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[parameters('HA1PublicIpName')]",
+                "[parameters('virtualNetworkName')]",
+                "[variables('nsgname-mgmt')]"
+            ],
+            "tags": {
+                "displayName": "[concat('NetworkInterfaces', '-X1')]"
+            },
+            "properties": {
+                "enableIPForwarding": true,
+                "networkSecurityGroup": {
+                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgname-mgmt'))]"
+                },
+                "ipConfigurations": [
+                    {
+                        "name": "[concat('ipconfig', '1')]",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "publicIPAddress": "[if(not(equals(parameters('HA1PublicIpNewOrExisting'), 'none')), variables('HA1PublicIpAddressId') , json('null'))]",
+                            "subnet": {
+                                "id": "[resourceId(parameters('virtualNetworkResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets/', parameters('virtualNetworkName'), parameters('subnetWANName'))]"
+                            },
+                            "primary": true
+                        }
+                    },
+                    {
+                        "name": "[concat('ipconfig', '-float')]",
+                        "properties": {
+                            "privateIPAllocationMethod": "Static",
+                            "privateIPAddress": "[concat(substring(parameters('subnetWANPrefix'), 0, lastIndexOf(parameters('subnetWANPrefix'), '.')), '.', variables('HASubnetWANFloatIPSuffix'))]",
+                            "publicIPAddress": "[if(not(equals(parameters('HAFloatPublicIpNewOrExisting'), 'none')), variables('HAFloatPublicIpAddressId') , json('null'))]",
+                            "subnet": {
+                                "id": "[resourceId(parameters('virtualNetworkResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets/', parameters('virtualNetworkName'), parameters('subnetWANName'))]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "apiVersion": "2018-04-01",
+            "type": "Microsoft.Network/networkInterfaces",
+            "name": "[concat(variables('HA1NicName'), '-X0')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[parameters('virtualNetworkName')]"
+            ],
+            "tags": {
+                "displayName": "[concat('NetworkInterfaces', '-X0')]"
+            },
+            "properties": {
+                "enableIPForwarding": true,
+                "ipConfigurations": [
+                    {
+                        "name": "[concat('ipconfig', '2')]",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[resourceId(parameters('virtualNetworkResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets/', parameters('virtualNetworkName'), parameters('subnetLANName'))]"
+                            },
+                            "primary": true
+                        }
+                    },
+                    {
+                        "name": "[concat('ipconfig', '-float')]",
+                        "properties": {
+                            "privateIPAllocationMethod": "Static",
+                            "privateIPAddress": "[concat(substring(parameters('subnetLANPrefix'), 0, lastIndexOf(parameters('subnetLANPrefix'), '.')), '.', variables('HASubnetLANFloatIPSuffix'))]",
+                            "subnet": {
+                                "id": "[resourceId(parameters('virtualNetworkResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets/', parameters('virtualNetworkName'), parameters('subnetLANName'))]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "apiVersion": "2018-04-01",
+            "type": "Microsoft.Network/networkInterfaces",
+            "name": "[concat(variables('HA1NicName'), '-X2')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[parameters('virtualNetworkName')]"
+            ],
+            "tags": {
+                "displayName": "[concat('NetworkInterfaces', '-X2')]"
+            },
+            "properties": {
+                "enableIPForwarding": true,
+                "ipConfigurations": [
+                    {
+                        "name": "[concat('ipconfig', '3')]",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[resourceId(parameters('virtualNetworkResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets/', parameters('virtualNetworkName'), parameters('subnetHAName'))]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "apiVersion": "2018-04-01",
+            "type": "Microsoft.Network/networkInterfaces",
+            "name": "[concat(variables('HA2NicName'), '-X1')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[concat(variables('HA1NicName'), '-X1')]",
+                "[parameters('HA2PublicIpName')]",
+                "[parameters('virtualNetworkName')]",
+                "[variables('nsgname-mgmt')]"
+            ],
+            "tags": {
+                "displayName": "[concat('NetworkInterfaces', '-X1')]"
+            },
+            "properties": {
+                "enableIPForwarding": true,
+                "networkSecurityGroup": {
+                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgname-mgmt'))]"
+                },
+                "ipConfigurations": [
+                    {
+                        "name": "[concat('ipconfig', '1')]",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "publicIPAddress": "[if(not(equals(parameters('HA2PublicIpNewOrExisting'), 'none')), variables('HA2PublicIpAddressId') , json('null'))]",
+                            "subnet": {
+                                "id": "[resourceId(parameters('virtualNetworkResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets/', parameters('virtualNetworkName'), parameters('subnetWANName'))]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "apiVersion": "2018-04-01",
+            "type": "Microsoft.Network/networkInterfaces",
+            "name": "[concat(variables('HA2NicName'), '-X0')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[concat(variables('HA1NicName'), '-X0')]",
+                "[parameters('virtualNetworkName')]"
+            ],
+            "tags": {
+                "displayName": "[concat('NetworkInterfaces', '-X0')]"
+            },
+            "properties": {
+                "enableIPForwarding": true,
+                "ipConfigurations": [
+                    {
+                        "name": "[concat('ipconfig', '2')]",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[resourceId(parameters('virtualNetworkResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets/', parameters('virtualNetworkName'), parameters('subnetLANName'))]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "apiVersion": "2018-04-01",
+            "type": "Microsoft.Network/networkInterfaces",
+            "name": "[concat(variables('HA2NicName'), '-X2')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[concat(variables('HA1NicName'), '-X2')]",
+                "[parameters('virtualNetworkName')]"
+            ],
+            "tags": {
+                "displayName": "[concat('NetworkInterfaces', '-X2')]"
+            },
+            "properties": {
+                "enableIPForwarding": true,
+                "ipConfigurations": [
+                    {
+                        "name": "[concat('ipconfig', '1')]",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[resourceId(parameters('virtualNetworkResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets/', parameters('virtualNetworkName'), parameters('subnetHAName'))]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "apiVersion": "2020-12-01",
+            "type": "Microsoft.Compute/virtualMachines",
+            "name": "[variables('Vm1Name')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]",
+                "[concat('Microsoft.Network/networkInterfaces/', variables('HA1NicName'), '-X1')]",
+                "[concat('Microsoft.Network/networkInterfaces/', variables('HA1NicName'), '-X0')]",
+                "[concat('Microsoft.Network/networkInterfaces/', variables('HA1NicName'), '-X2')]"
+            ],
+            "plan": {
+                "name": "[parameters('imageSku')]",
+                "product": "[variables('imageOffer')]",
+                "publisher": "[variables('imagePublisher')]"
+            },
+            "properties": {
+                "availabilitySet": {
+                    "id": "[resourceId('Microsoft.Compute/availabilitySets', variables('availabilitySetName'))]"
+                },
+                "hardwareProfile": {
+                    "vmSize": "[variables('vmSize')]"
+                },
+                "osProfile": "[if(equals(parameters('authenticationType'), 'password'), variables('Vm1SshPasswordOsProfile'), variables('Vm1SshKeyOsProfile'))]",
+                "securityProfile": "[if(sonicwall.isLegacySku(parameters('imageSku')), json('null'), variables('trustedLaunchSecurityProfile'))]",
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "[variables('imagePublisher')]",
+                        "offer": "[variables('imageOffer')]",
+                        "sku": "[parameters('imageSku')]",
+                        "version": "[variables('imageVersion')]"
+                    },
+                    "osDisk": {
+                        "caching": "ReadWrite",
+                        "createOption": "FromImage"
+                    }
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('HA1NicName'), '-X1'))]",
+                            "properties": {
+                                "primary": true
+                            }
+                        },
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('HA1NicName'), '-X0'))]",
+                            "properties": {
+                                "primary": false
+                            }
+                        },
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('HA1NicName'), '-X2'))]",
+                            "properties": {
+                                "primary": false
+                            }
+                        }
+                    ]
+                }
+            },
+            "identity": {
+                "type": "SystemAssigned"
+            }
+        },
+        {
+            "type": "Microsoft.Authorization/roleAssignments",
+            "apiVersion": "2017-05-01",
+            "name": "[guid(resourceGroup().id, variables('Vm1Name'))]",
+            "dependsOn": [
+                "[variables('Vm1Name')]"
+            ],
+            "properties": {
+                "roleDefinitionId": "[variables('RoleContributor')]",
+                "principalId": "[reference(variables('Vm1Name'), '2020-12-01', 'Full').identity.principalId]",
+                "scope": "[resourceGroup().id]"
+            }
+        },
+        {
+            "apiVersion": "2020-12-01",
+            "type": "Microsoft.Compute/virtualMachines",
+            "name": "[variables('Vm2Name')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]",
+                "[concat('Microsoft.Network/networkInterfaces/', variables('HA2NicName'), '-X1')]",
+                "[concat('Microsoft.Network/networkInterfaces/', variables('HA2NicName'), '-X0')]",
+                "[concat('Microsoft.Network/networkInterfaces/', variables('HA2NicName'), '-X2')]"
+            ],
+            "plan": {
+                "name": "[parameters('imageSku')]",
+                "product": "[variables('imageOffer')]",
+                "publisher": "[variables('imagePublisher')]"
+            },
+            "properties": {
+                "availabilitySet": {
+                    "id": "[resourceId('Microsoft.Compute/availabilitySets', variables('availabilitySetName'))]"
+                },
+                "hardwareProfile": {
+                    "vmSize": "[variables('vmSize')]"
+                },
+                "osProfile": "[if(equals(parameters('authenticationType'), 'password'), variables('Vm2SshPasswordOsProfile'), variables('Vm2SshKeyOsProfile'))]",
+                "securityProfile": "[if(sonicwall.isLegacySku(parameters('imageSku')), json('null'), variables('trustedLaunchSecurityProfile'))]",
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "[variables('imagePublisher')]",
+                        "offer": "[variables('imageOffer')]",
+                        "sku": "[parameters('imageSku')]",
+                        "version": "[variables('imageVersion')]"
+                    },
+                    "osDisk": {
+                        "caching": "ReadWrite",
+                        "createOption": "FromImage"
+                    }
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('HA2NicName'), '-X1'))]",
+                            "properties": {
+                                "primary": true
+                            }
+                        },
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('HA2NicName'), '-X0'))]",
+                            "properties": {
+                                "primary": false
+                            }
+                        },
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('HA2NicName'), '-X2'))]",
+                            "properties": {
+                                "primary": false
+                            }
+                        }
+                    ]
+                }
+            },
+            "identity": {
+                "type": "SystemAssigned"
+            }
+        },
+        {
+            "type": "Microsoft.Authorization/roleAssignments",
+            "apiVersion": "2017-05-01",
+            "name": "[guid(resourceGroup().id, variables('Vm2Name'))]",
+            "dependsOn": [
+                "[variables('Vm2Name')]"
+            ],
+            "properties": {
+                "roleDefinitionId": "[variables('RoleContributor')]",
+                "principalId": "[reference(variables('Vm2Name'), '2020-12-01', 'Full').identity.principalId]",
+                "scope": "[resourceGroup().id]"
+            }
+        }
+    ]
+}
