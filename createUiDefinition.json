@@ -251,6 +251,9 @@
                         "request": {
                             "method": "GET",
                             "path": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Compute/locations/', location(), '/publishers/sonicwall-inc/artifacttypes/vmimage/offers/sonicwall-nsz-azure/skus/', if(or(or(equals(steps('instanceDetails').nsvModel, 'NSv 270'), equals(steps('instanceDetails').nsvModel, 'NSv 470')), equals(steps('instanceDetails').nsvModel, 'NSv 870')), steps('instanceDetails').gen7Plan, 'snwl-nsv-scx-gen8'), '/versions?api-version=2022-08-01')]"
+                        },
+                        "transforms": {
+                            "list": "[].{label:name, value:name}"
                         }
                     },
                     {
@@ -260,7 +263,7 @@
                         "defaultValue": "latest",
                         "toolTip": "Select \"latest\" to always deploy the newest available image, or choose a specific version to pin the deployment.",
                         "constraints": {
-                            "allowedValues": "[concat(array(createObject('label', 'latest (always newest)', 'value', 'latest')), map(steps('instanceDetails').imageVersionsList, (v) => createObject('label', v.name, 'value', v.name)))]",
+                            "allowedValues": "[concat(array(createObject('label', 'latest (always newest)', 'value', 'latest')), steps('instanceDetails').imageVersionsList.transformed.list)]",
                             "required": true
                         },
                         "visible": true
