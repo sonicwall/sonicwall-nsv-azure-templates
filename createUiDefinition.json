@@ -129,13 +129,76 @@
                         "visible": "[not(or(or(equals(steps('instanceDetails').nsvModel, 'NSv 270'), equals(steps('instanceDetails').nsvModel, 'NSv 470')), equals(steps('instanceDetails').nsvModel, 'NSv 870')))]"
                     },
                     {
-                        "name": "gen7SizeInfo",
-                        "type": "Microsoft.Common.InfoBox",
-                        "options": {
-                            "icon": "Info",
-                            "text": "The VM size for NSv 270, NSv 470 and NSv 870 is determined by the model and the selected plan; it is not configurable."
+                        "name": "vmSize270",
+                        "type": "Microsoft.Compute.SizeSelector",
+                        "label": "Virtual machine size for NSv 270",
+                        "toolTip": "Sizes certified for the NSv 270 model.",
+                        "recommendedSizes": [
+                            "Standard_DS2_v2",
+                            "Standard_D2_v2"
+                        ],
+                        "constraints": {
+                            "allowedSizes": [
+                                "Standard_DS2_v2",
+                                "Standard_D2_v2"
+                            ]
                         },
-                        "visible": "[or(or(equals(steps('instanceDetails').nsvModel, 'NSv 270'), equals(steps('instanceDetails').nsvModel, 'NSv 470')), equals(steps('instanceDetails').nsvModel, 'NSv 870'))]"
+                        "osPlatform": "Linux",
+                        "imageReference": {
+                            "publisher": "sonicwall-inc",
+                            "offer": "sonicwall-nsz-azure",
+                            "sku": "[steps('instanceDetails').gen7Plan]"
+                        },
+                        "count": "1",
+                        "visible": "[equals(steps('instanceDetails').nsvModel, 'NSv 270')]"
+                    },
+                    {
+                        "name": "vmSize470",
+                        "type": "Microsoft.Compute.SizeSelector",
+                        "label": "Virtual machine size for NSv 470",
+                        "toolTip": "Sizes certified for the NSv 470 model.",
+                        "recommendedSizes": [
+                            "Standard_D4s_v4",
+                            "Standard_D3_v2"
+                        ],
+                        "constraints": {
+                            "allowedSizes": [
+                                "Standard_D4s_v4",
+                                "Standard_D3_v2"
+                            ]
+                        },
+                        "osPlatform": "Linux",
+                        "imageReference": {
+                            "publisher": "sonicwall-inc",
+                            "offer": "sonicwall-nsz-azure",
+                            "sku": "[steps('instanceDetails').gen7Plan]"
+                        },
+                        "count": "1",
+                        "visible": "[equals(steps('instanceDetails').nsvModel, 'NSv 470')]"
+                    },
+                    {
+                        "name": "vmSize870",
+                        "type": "Microsoft.Compute.SizeSelector",
+                        "label": "Virtual machine size for NSv 870",
+                        "toolTip": "Sizes certified for the NSv 870 model.",
+                        "recommendedSizes": [
+                            "Standard_DS4_v2",
+                            "Standard_D4_v2"
+                        ],
+                        "constraints": {
+                            "allowedSizes": [
+                                "Standard_DS4_v2",
+                                "Standard_D4_v2"
+                            ]
+                        },
+                        "osPlatform": "Linux",
+                        "imageReference": {
+                            "publisher": "sonicwall-inc",
+                            "offer": "sonicwall-nsz-azure",
+                            "sku": "[steps('instanceDetails').gen7Plan]"
+                        },
+                        "count": "1",
+                        "visible": "[equals(steps('instanceDetails').nsvModel, 'NSv 870')]"
                     },
                     {
                         "name": "vmSizeXS",
@@ -389,7 +452,7 @@
             "vmName": "[basics('vmName')]",
             "nsvModel": "[steps('instanceDetails').nsvModel]",
             "imageSku": "[if(or(or(equals(steps('instanceDetails').nsvModel, 'NSv 270'), equals(steps('instanceDetails').nsvModel, 'NSv 470')), equals(steps('instanceDetails').nsvModel, 'NSv 870')), steps('instanceDetails').gen7Plan, 'snwl-nsv-scx-gen8')]",
-            "vmSize": "[if(equals(steps('instanceDetails').nsvModel, 'NSv XS'), steps('instanceDetails').vmSizeXS, if(equals(steps('instanceDetails').nsvModel, 'NSv S'), steps('instanceDetails').vmSizeS, if(equals(steps('instanceDetails').nsvModel, 'NSv M'), steps('instanceDetails').vmSizeM, if(equals(steps('instanceDetails').nsvModel, 'NSv L'), steps('instanceDetails').vmSizeL, ''))))]",
+            "vmSize": "[if(equals(steps('instanceDetails').nsvModel, 'NSv 270'), steps('instanceDetails').vmSize270, if(equals(steps('instanceDetails').nsvModel, 'NSv 470'), steps('instanceDetails').vmSize470, if(equals(steps('instanceDetails').nsvModel, 'NSv 870'), steps('instanceDetails').vmSize870, if(equals(steps('instanceDetails').nsvModel, 'NSv XS'), steps('instanceDetails').vmSizeXS, if(equals(steps('instanceDetails').nsvModel, 'NSv S'), steps('instanceDetails').vmSizeS, if(equals(steps('instanceDetails').nsvModel, 'NSv M'), steps('instanceDetails').vmSizeM, if(equals(steps('instanceDetails').nsvModel, 'NSv L'), steps('instanceDetails').vmSizeL, '')))))))]",
             "imageVersion": "[if(equals(steps('instanceDetails').imageVersionChoice, 'latest'), 'latest', steps('instanceDetails').imageVersionPinned)]",
             "authenticationType": "[basics('SSHCredentials').authenticationType]",
             "SSHPassword": "[coalesce(basics('SSHCredentials').password, basics('SSHCredentials').sshPublicKey)]",
