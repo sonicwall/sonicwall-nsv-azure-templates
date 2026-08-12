@@ -61,7 +61,7 @@
                         "name": "nsvModel",
                         "type": "Microsoft.Common.DropDown",
                         "label": "NSv model",
-                        "defaultValue": "NSv 470",
+                        "defaultValue": "NSv XS",
                         "toolTip": "The SonicWall NSv model to deploy. The model determines which image generation is used and which VM sizes are available.",
                         "constraints": {
                             "allowedValues": [

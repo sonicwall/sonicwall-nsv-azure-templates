@@ -73,7 +73,7 @@
         },
         "imageSku": {
             "type": "string",
-            "defaultValue": "snwl-nsv-scx",
+            "defaultValue": "snwl-nsv-scx-gen8",
             "metadata": {
                 "description": "The name of the Azure product to load. Specify \"snwl-nsv-scx\" for gen7 NSv 7.1 or newer images, \"snwl-nsv-byol\" for gen7 NSv 7.0 images, or \"snwl-nsv-scx-gen8\" for gen8 images. The SKU must match the selected nsvModel: NSv 270, NSv 470 and NSv 870 require a gen7 SKU; NSv XS, NSv S, NSv M and NSv L require the gen8 SKU. A mismatched combination fails template validation."
             }
@@ -106,7 +106,7 @@
             "metadata": {
                 "description": "SonicWall-NSv model. Each model deploys a recommended Azure VM size, for both members of the HA pair. NSv 270, NSv 470 and NSv 870 are gen7 models and require a gen7 imageSku (\"snwl-nsv-scx\" or \"snwl-nsv-byol\"); their size depends on which of the two is selected. NSv XS, NSv S, NSv M and NSv L are gen8 models and require the gen8 imageSku (\"snwl-nsv-scx-gen8\"); to deploy one of them on a different certified size, set the vmSize parameter. Pairing a model with the wrong SKU generation fails template validation."
             },
-            "defaultValue": "NSv 470"
+            "defaultValue": "NSv XS"
         },
         "vmSize": {
             "type": "string",

@@ -79,7 +79,7 @@
     },
     "imageSkuType": {
       "type": "string",
-      "defaultValue": "scx",
+      "defaultValue": "scx-gen8",
       "allowedValues": [
         "scx",
         "byol",
@@ -116,7 +116,7 @@
       "metadata": {
         "description": "SonicWall-NSv model. Each model deploys a recommended Azure VM size, for both members of the HA pair. NSv 270, NSv 470 and NSv 870 are gen7 models and require a gen7 imageSkuType (\"scx\" or \"byol\"); their size depends on which of the two is selected. NSv XS, NSv S, NSv M and NSv L are gen8 models and require the gen8 imageSkuType (\"scx-gen8\"); to deploy one of them on a different certified size, set the vmSize parameter. Pairing a model with the wrong SKU generation fails template validation."
       },
-      "defaultValue": "NSv 470"
+      "defaultValue": "NSv XS"
     },
     "vmSize": {
       "type": "string",
