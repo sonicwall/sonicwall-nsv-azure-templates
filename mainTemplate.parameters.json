@@ -36,13 +36,13 @@
       "value": null
     },
     "imageSku": {
-      "value": "snwl-nsv-scx"
+      "value": "snwl-nsv-scx-gen8"
     },
     "managementAccessIPSource": {
       "value": null
     },
     "nsvModel": {
-      "value": "NSv 470"
+      "value": "NSv XS"
     },
     "vmSize": {
       "value": ""
