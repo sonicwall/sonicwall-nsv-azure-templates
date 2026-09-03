@@ -254,6 +254,7 @@
                         "toolTip": "Sizes certified for the NSv S model.",
                         "recommendedSizes": [
                             "Standard_D2ds_v4",
+                            "Standard_D2ds_v5",
                             "Standard_D2s_v4",
                             "Standard_D2d_v4"
                         ],
@@ -261,6 +262,7 @@
                             "allowedSizes": [
                                 "Standard_D2d_v4",
                                 "Standard_D2ds_v4",
+                                "Standard_D2ds_v5",
                                 "Standard_D2s_v4"
                             ]
                         },
