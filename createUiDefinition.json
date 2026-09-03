@@ -261,9 +261,11 @@
                         "constraints": {
                             "allowedSizes": [
                                 "Standard_D2d_v4",
+                                "Standard_D2d_v5",
                                 "Standard_D2ds_v4",
                                 "Standard_D2ds_v5",
-                                "Standard_D2s_v4"
+                                "Standard_D2s_v4",
+                                "Standard_D2s_v5"
                             ]
                         },
                         "osPlatform": "Linux",
@@ -288,9 +290,13 @@
                         "constraints": {
                             "allowedSizes": [
                                 "Standard_D4_v4",
+                                "Standard_D4_v5",
                                 "Standard_D4s_v4",
+                                "Standard_D4s_v5",
                                 "Standard_D4d_v4",
-                                "Standard_D4ds_v4"
+                                "Standard_D4d_v5",
+                                "Standard_D4ds_v4",
+                                "Standard_D4ds_v5"
                             ]
                         },
                         "osPlatform": "Linux",
@@ -315,8 +321,11 @@
                         "constraints": {
                             "allowedSizes": [
                                 "Standard_D8_v4",
+                                "Standard_D8_v5",
                                 "Standard_D8_v3",
-                                "Standard_D8s_v3"
+                                "Standard_D8s_v3",
+                                "Standard_D8s_v5",
+                                "Standard_D8ds_v5"
                             ]
                         },
                         "osPlatform": "Linux",
