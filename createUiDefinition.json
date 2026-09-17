@@ -146,6 +146,7 @@
                                 "Standard_D2_v4",
                                 "Standard_D2ds_v4",
                                 "Standard_D2s_v4",
+                                "Standard_D2d_v4",
                                 "Standard_D3_v2",
                                 "Standard_DS3_v2"
                             ]
@@ -206,7 +207,10 @@
                                 "Standard_F8s",
                                 "Standard_D8_v3",
                                 "Standard_D8s_v3",
-                                "Standard_D8_v4"
+                                "Standard_D8_v4",
+                                "Standard_D8s_v4",
+                                "Standard_D8d_v4",
+                                "Standard_D8ds_v4"
                             ]
                         },
                         "osPlatform": "Linux",
