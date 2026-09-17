@@ -20,9 +20,28 @@ Press the "Deploy to Azure" button to load the ARM template into your Azure subs
 
 [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fsonicwall%2Fsonicwall-nsv-azure-templates%2Fmaster%2FmainTemplate.json)
 
+
+Press the "Deploy to Azure" button below to load the ARM template with custom UI into your Azure subscription.
+
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fsonicwall%2Fsonicwall-nsv-azure-templates%2Fmaster%2FmainTemplate.json/createUIDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2Fsonicwall%2Fsonicwall-nsv-azure-templates%2Fmaster%2FcreateUiDefinition.json)
+
 To find out more about ARM templates refer to https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-template-deploy#deploy-with-azure-cli
 
 ***
+
+
+⚠️ Tech Preview – Azure v5 Instances
+-----------------------
+Support for Azure v5 VM instances is currently available as a Tech Preview.
+This capability is provided for evaluation and validation purposes and has not yet reached General Availability (GA).
+Customers are encouraged to deploy and validate NSv on v5 instances in non-production/test environments before considering production deployment.
+
+**Tech Preview limitations:**
+- Functionality and performance are subject to change. 
+- The configuration has not yet completed full GA-level validation. 
+- Customers may encounter issues that are addressed in subsequent releases.
+
+**Target:** General Availability for Azure v5, v6, and v7 instance support is planned for Feb/Mar 2027.
 
 
 # License
