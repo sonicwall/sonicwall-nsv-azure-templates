@@ -242,7 +242,11 @@
                                 "Standard_DS12-1_v2",
                                 "Standard_D2d_v5",
                                 "Standard_D2ds_v5",
-                                "Standard_D2s_v5"
+                                "Standard_D2s_v5",
+                                "Standard_D2ds_v6",
+                                "Standard_D2s_v6",
+                                "Standard_D2ds_v7",
+                                "Standard_D2s_v7"
                             ]
                         },
                         "osPlatform": "Linux",
@@ -272,7 +276,11 @@
                                 "Standard_D2ds_v4",
                                 "Standard_D2ds_v5",
                                 "Standard_D2s_v4",
-                                "Standard_D2s_v5"
+                                "Standard_D2s_v5",
+                                "Standard_D2ds_v6",
+                                "Standard_D2s_v6",
+                                "Standard_D2ds_v7",
+                                "Standard_D2s_v7"
                             ]
                         },
                         "osPlatform": "Linux",
@@ -303,7 +311,11 @@
                                 "Standard_D4d_v4",
                                 "Standard_D4d_v5",
                                 "Standard_D4ds_v4",
-                                "Standard_D4ds_v5"
+                                "Standard_D4ds_v5",
+                                "Standard_D4s_v6",
+                                "Standard_D4ds_v6",
+                                "Standard_D4s_v7",
+                                "Standard_D4ds_v7"
                             ]
                         },
                         "osPlatform": "Linux",
@@ -332,7 +344,11 @@
                                 "Standard_D8_v3",
                                 "Standard_D8s_v3",
                                 "Standard_D8s_v5",
-                                "Standard_D8ds_v5"
+                                "Standard_D8ds_v5",
+                                "Standard_D8s_v6",
+                                "Standard_D8ds_v6",
+                                "Standard_D8s_v7",
+                                "Standard_D8ds_v7"
                             ]
                         },
                         "osPlatform": "Linux",
