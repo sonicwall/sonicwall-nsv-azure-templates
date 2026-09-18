@@ -57,7 +57,7 @@
     "authenticationType": {
       "type": "string",
       "metadata": {
-        "descritpion": "Type of authentication "
+        "description": "Type of authentication"
       },
       "allowedValues": [
         "sshPublicKey",
