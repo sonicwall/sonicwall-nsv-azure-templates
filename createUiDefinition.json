@@ -148,7 +148,11 @@
                                 "Standard_D2s_v4",
                                 "Standard_D2d_v4",
                                 "Standard_D3_v2",
-                                "Standard_DS3_v2"
+                                "Standard_DS3_v2",
+                                "Standard_D2_v5",
+                                "Standard_D2s_v5",
+                                "Standard_D2d_v5",
+                                "Standard_D2ds_v5"
                             ]
                         },
                         "osPlatform": "Linux",
@@ -176,7 +180,11 @@
                                 "Standard_D3_v2",
                                 "Standard_D4_v4",
                                 "Standard_D4d_v4",
-                                "Standard_D4ds_v4"
+                                "Standard_D4ds_v4",
+                                "Standard_D4_v5",
+                                "Standard_D4s_v5",
+                                "Standard_D4d_v5",
+                                "Standard_D4ds_v5"
                             ]
                         },
                         "osPlatform": "Linux",
@@ -210,7 +218,11 @@
                                 "Standard_D8_v4",
                                 "Standard_D8s_v4",
                                 "Standard_D8d_v4",
-                                "Standard_D8ds_v4"
+                                "Standard_D8ds_v4",
+                                "Standard_D8_v5",
+                                "Standard_D8s_v5",
+                                "Standard_D8d_v5",
+                                "Standard_D8ds_v5"
                             ]
                         },
                         "osPlatform": "Linux",
